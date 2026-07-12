@@ -1,0 +1,117 @@
+# =============================================================================
+# Domain: Corpus (support-anchored knowledge base)
+# Entity: ArticleLink + ArticleFeedback
+# Description: ArticleLink is the SEAM-BEARER — a polymorphic logical FK tying an
+# article to the thing it explains (a support Issue, a WarrantyClaim, a catalog
+# Item) via (target_module, target_id), NO DB FK. ArticleFeedback is the
+# deflection metric ("was this helpful?"). Region-neutral.
+# =============================================================================
+
+models:
+  - name: ArticleLink
+    collection: article_links
+    description: "A polymorphic link from an article to the thing it explains (the cross-module seam)"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique link identifier"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Books owner # logical FK to organization.Company.id"
+
+      article_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Article.id)"]
+        description: "The article being linked"
+
+      target_module:
+        type: string
+        attributes: ["@required", "@max(40)"]
+        description: "The module owning the target (e.g. support, catalog) — polymorphic discriminator"
+
+      target_type:
+        type: string
+        attributes: ["@required", "@max(40)"]
+        description: "The target entity kind (e.g. issue, warranty_claim, item)"
+
+      target_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "The target's id # logical FK across modules, NO DB constraint"
+
+      category_key:
+        type: string?
+        attributes: ["@max(40)"]
+        description: "Optional routing key (e.g. the issue's category) for suggest-by-category deflection"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      article:
+        type: Article
+        attributes: ["@one", "@foreign_key(article_id)"]
+        description: "The linked article"
+        inverse: links
+
+    indexes:
+      # The deflection read: given a target (issue/item), find its linked articles.
+      - type: index
+        fields: [company_id, target_module, target_id]
+      - type: index
+        fields: [company_id, target_module, category_key]
+      - type: unique
+        fields: [article_id, target_module, target_id]
+        where: "deleted_at IS NULL"
+
+  - name: ArticleFeedback
+    collection: article_feedback
+    description: "A reader's 'was this helpful?' vote on an article — the deflection metric"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique feedback identifier"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Books owner # logical FK to organization.Company.id"
+
+      article_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Article.id)"]
+        description: "The article rated"
+
+      helpful:
+        type: bool
+        attributes: ["@required"]
+        description: "true = helpful, false = not helpful"
+
+      note:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Optional free-text note"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      article:
+        type: Article
+        attributes: ["@one", "@foreign_key(article_id)"]
+        description: "The rated article"
+        inverse: feedback
+
+    indexes:
+      - type: index
+        fields: [article_id]

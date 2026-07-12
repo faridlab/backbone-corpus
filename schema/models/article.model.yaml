@@ -1,0 +1,117 @@
+# =============================================================================
+# Domain: Corpus (support-anchored knowledge base)
+# Entity: Article + ArticleCategory
+# Description: The KB unit — an authored help article with a publish lifecycle,
+# filed under a category. Only PUBLISHED articles are served to customers (the
+# deflection read path); a draft must never leak. Region-neutral.
+# =============================================================================
+
+models:
+  - name: ArticleCategory
+    collection: article_categories
+    description: "A browse/routing taxonomy folder (e.g. Billing, Returns)"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique category identifier"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Books owner # logical FK to organization.Company.id"
+
+      code:
+        type: string
+        attributes: ["@required", "@max(40)"]
+        description: "Short code unique within a company (e.g. billing, returns)"
+
+      name:
+        type: string
+        attributes: ["@required", "@max(120)"]
+        description: "Display name"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    indexes:
+      - type: unique
+        fields: [company_id, code]
+        where: "deleted_at IS NULL"
+
+  - name: Article
+    collection: articles
+    description: "A knowledge-base article (draft → published); only published articles are served"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique article identifier"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Books owner # logical FK to organization.Company.id"
+
+      category_id:
+        type: uuid?
+        attributes: ["@foreign_key(ArticleCategory.id)"]
+        description: "The category this article is filed under"
+
+      title:
+        type: string
+        attributes: ["@required", "@max(200)"]
+        description: "Article title"
+
+      body:
+        type: string
+        attributes: ["@required", "@max(20000)"]
+        description: "Article body (markdown)"
+
+      status:
+        type: ArticleStatus
+        attributes: ["@default(draft)"]
+        description: "draft (private, editable) → published (served to customers) → archived"
+
+      revision:
+        type: int
+        attributes: ["@default(1)", "@non_negative"]
+        description: "Monotonic revision counter, bumped on each edit"
+
+      published_at:
+        type: datetime?
+        description: "When the article was first published (set on the draft→published transition)"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      category:
+        type: ArticleCategory
+        attributes: ["@one", "@foreign_key(category_id)"]
+        description: "The filing category"
+        inverse: articles
+
+    indexes:
+      - type: index
+        fields: [company_id, status]
+      - type: index
+        fields: [category_id]
+
+enums:
+  - name: ArticleStatus
+    description: "Publish lifecycle of a KB article"
+    variants:
+      - name: draft
+        description: "Private, editable; never served to customers"
+        default: true
+      - name: published
+        description: "Live; served on the deflection/self-service read path"
+      - name: archived
+        description: "Retired; no longer served but kept for history"
