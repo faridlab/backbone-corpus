@@ -8,8 +8,13 @@
 
 use backbone_orm::company_scope;
 use chrono::Utc;
-use sqlx::{PgPool, Row};
+use sqlx::PgPool;
 use uuid::Uuid;
+
+use crate::infrastructure::persistence::{
+    ArticleCategoryRepository, ArticleFeedbackRepository, ArticleLinkRepository, ArticleRepository,
+    ArticleStatsRow, ArticleViewRow, NewArticleRow, NewCategoryRow, NewFeedbackRow, NewLinkRow,
+};
 
 #[derive(Debug, thiserror::Error)]
 pub enum CorpusError {
@@ -65,11 +70,19 @@ pub struct ArticleStats {
 
 pub struct CorpusWriteService {
     pool: PgPool,
+    categories: ArticleCategoryRepository,
+    articles: ArticleRepository,
+    links: ArticleLinkRepository,
+    feedback: ArticleFeedbackRepository,
 }
 
 impl CorpusWriteService {
     pub fn new(pool: PgPool) -> Self {
-        Self { pool }
+        let categories = ArticleCategoryRepository::new(pool.clone());
+        let articles = ArticleRepository::new(pool.clone());
+        let links = ArticleLinkRepository::new(pool.clone());
+        let feedback = ArticleFeedbackRepository::new(pool.clone());
+        Self { pool, categories, articles, links, feedback }
     }
 
     pub async fn create_category(&self, c: NewCategory) -> Result<Uuid, CorpusError> {
@@ -78,12 +91,12 @@ impl CorpusWriteService {
         let company = c.company_id;
         company_scope::with_company_scope(Some(company), async move {
             let id = Uuid::new_v4();
-            company_scope::execute_scoped(
-                &self.pool,
-                sqlx::query(
-                    "INSERT INTO corpus.article_categories (id, company_id, code, name) VALUES ($1,$2,$3,$4)")
-                    .bind(id).bind(c.company_id).bind(&c.code).bind(&c.name),
-            ).await?;
+            self.categories.insert_category(&self.pool, &NewCategoryRow {
+                id,
+                company_id: c.company_id,
+                code: &c.code,
+                name: &c.name,
+            }).await?;
             Ok(id)
         }).await
     }
@@ -97,14 +110,13 @@ impl CorpusWriteService {
         let company = a.company_id;
         company_scope::with_company_scope(Some(company), async move {
             let id = Uuid::new_v4();
-            company_scope::execute_scoped(
-                &self.pool,
-                sqlx::query(
-                    r#"INSERT INTO corpus.articles (id, company_id, category_id, title, body, status, revision)
-                       VALUES ($1,$2,$3,$4,$5,'draft'::article_status,1)"#,
-                )
-                .bind(id).bind(a.company_id).bind(a.category_id).bind(&a.title).bind(&a.body),
-            ).await?;
+            self.articles.insert_article(&self.pool, &NewArticleRow {
+                id,
+                company_id: a.company_id,
+                category_id: a.category_id,
+                title: &a.title,
+                body: &a.body,
+            }).await?;
             Ok(id)
         }).await
     }
@@ -114,15 +126,7 @@ impl CorpusWriteService {
         // RLS scope (ADR-0008), ID-only pattern: identified by the article id alone — no company arg.
         // This rides the request-dedicated connection (which carries the caller's `app.company_id`), so
         // RLS fences the update; another company's article is simply not found.
-        let rev: Option<i32> = company_scope::fetch_optional_scalar_scoped(
-            &self.pool,
-            sqlx::query_scalar(
-                r#"UPDATE corpus.articles SET title=$2, body=$3, revision=revision+1
-                   WHERE id=$1 AND (metadata->>'deleted_at') IS NULL
-                   RETURNING revision"#,
-            )
-            .bind(article_id).bind(title).bind(body),
-        ).await?;
+        let rev = self.articles.update_content(&self.pool, article_id, title, body).await?;
         rev.ok_or(CorpusError::NotFound("article"))
     }
 
@@ -130,30 +134,15 @@ impl CorpusWriteService {
     /// happens once. After this the article is served on the deflection read.
     pub async fn publish_article(&self, article_id: Uuid) -> Result<bool, CorpusError> {
         // RLS scope (ADR-0008), ID-only pattern — see `edit_article`.
-        let moved = company_scope::execute_scoped(
-            &self.pool,
-            sqlx::query(
-                r#"UPDATE corpus.articles
-                   SET status='published'::article_status, published_at=$2
-                   WHERE id=$1 AND status='draft'::article_status AND (metadata->>'deleted_at') IS NULL"#,
-            )
-            .bind(article_id).bind(Utc::now()),
-        ).await?;
-        Ok(moved.rows_affected() == 1)
+        let moved = self.articles.mark_published(&self.pool, article_id, Utc::now()).await?;
+        Ok(moved == 1)
     }
 
     /// Retire a published article (archived → no longer served, kept for history).
     pub async fn archive_article(&self, article_id: Uuid) -> Result<bool, CorpusError> {
         // RLS scope (ADR-0008), ID-only pattern — see `edit_article`.
-        let moved = company_scope::execute_scoped(
-            &self.pool,
-            sqlx::query(
-                r#"UPDATE corpus.articles SET status='archived'::article_status
-                   WHERE id=$1 AND status='published'::article_status AND (metadata->>'deleted_at') IS NULL"#,
-            )
-            .bind(article_id),
-        ).await?;
-        Ok(moved.rows_affected() == 1)
+        let moved = self.articles.mark_archived(&self.pool, article_id).await?;
+        Ok(moved == 1)
     }
 
     /// Link an article to the thing it explains (a support Issue, a catalog Item) via the polymorphic
@@ -163,30 +152,22 @@ impl CorpusWriteService {
         // upsert and the conflict re-read are fenced.
         company_scope::with_company_scope(Some(company_id), async move {
             let id = Uuid::new_v4();
-            let inserted: Option<Uuid> = company_scope::fetch_optional_scalar_scoped(
-                &self.pool,
-                sqlx::query_scalar(
-                    r#"INSERT INTO corpus.article_links
-                         (id, company_id, article_id, target_module, target_type, target_id, category_key)
-                       VALUES ($1,$2,$3,$4,$5,$6,$7)
-                       ON CONFLICT (article_id, target_module, target_id) WHERE (metadata->>'deleted_at') IS NULL
-                       DO NOTHING
-                       RETURNING id"#,
-                )
-                .bind(id).bind(company_id).bind(article_id).bind(&t.target_module).bind(&t.target_type)
-                .bind(t.target_id).bind(&t.category_key),
-            ).await?;
+            let inserted = self.links.claim_link(&self.pool, &NewLinkRow {
+                id,
+                company_id,
+                article_id,
+                target_module: &t.target_module,
+                target_type: &t.target_type,
+                target_id: t.target_id,
+                category_key: t.category_key.as_deref(),
+            }).await?;
             // On conflict the INSERT returns nothing — return the EXISTING link's id so a re-link is a true no-op.
             match inserted {
                 Some(new_id) => Ok(new_id),
-                None => Ok(company_scope::fetch_one_scalar_scoped(
-                    &self.pool,
-                    sqlx::query_scalar(
-                        r#"SELECT id FROM corpus.article_links
-                           WHERE article_id=$1 AND target_module=$2 AND target_id=$3 AND (metadata->>'deleted_at') IS NULL"#,
-                    )
-                    .bind(article_id).bind(&t.target_module).bind(t.target_id),
-                ).await?),
+                None => Ok(self
+                    .links
+                    .fetch_link_id(&self.pool, article_id, &t.target_module, t.target_id)
+                    .await?),
             }
         }).await
     }
@@ -196,12 +177,13 @@ impl CorpusWriteService {
         // RLS scope (ADR-0008): company is on the parameter.
         company_scope::with_company_scope(Some(company_id), async move {
             let id = Uuid::new_v4();
-            company_scope::execute_scoped(
-                &self.pool,
-                sqlx::query(
-                    "INSERT INTO corpus.article_feedback (id, company_id, article_id, helpful, note) VALUES ($1,$2,$3,$4,$5)")
-                    .bind(id).bind(company_id).bind(article_id).bind(helpful).bind(&note),
-            ).await?;
+            self.feedback.insert_feedback(&self.pool, &NewFeedbackRow {
+                id,
+                company_id,
+                article_id,
+                helpful,
+                note: note.as_deref(),
+            }).await?;
             Ok(id)
         }).await
     }
@@ -221,19 +203,7 @@ impl CorpusWriteService {
         // stays as defense-in-depth.
         let rows = company_scope::with_company_scope(
             Some(company_id),
-            company_scope::fetch_all_rows_scoped(
-                &self.pool,
-                sqlx::query(
-                    r#"SELECT a.id, a.title, a.body, a.category_id
-                       FROM corpus.articles a
-                       JOIN corpus.article_links l ON l.article_id = a.id
-                       WHERE l.company_id = $1 AND l.target_module = $2 AND l.target_id = $3
-                         AND a.status = 'published'::article_status
-                         AND (a.metadata->>'deleted_at') IS NULL AND (l.metadata->>'deleted_at') IS NULL
-                       ORDER BY a.published_at DESC NULLS LAST"#,
-                )
-                .bind(company_id).bind(target_module).bind(target_id),
-            ),
+            self.articles.suggest_for_target(&self.pool, company_id, target_module, target_id),
         ).await?;
         Ok(rows.iter().map(row_to_view).collect())
     }
@@ -249,19 +219,7 @@ impl CorpusWriteService {
         // RLS scope (ADR-0008): read-only, company on the parameter.
         let rows = company_scope::with_company_scope(
             Some(company_id),
-            company_scope::fetch_all_rows_scoped(
-                &self.pool,
-                sqlx::query(
-                    r#"SELECT DISTINCT a.id, a.title, a.body, a.category_id, a.published_at
-                       FROM corpus.articles a
-                       JOIN corpus.article_links l ON l.article_id = a.id
-                       WHERE l.company_id = $1 AND l.target_module = $2 AND l.category_key = $3
-                         AND a.status = 'published'::article_status
-                         AND (a.metadata->>'deleted_at') IS NULL AND (l.metadata->>'deleted_at') IS NULL
-                       ORDER BY a.published_at DESC NULLS LAST"#,
-                )
-                .bind(company_id).bind(target_module).bind(category_key),
-            ),
+            self.articles.suggest_for_category(&self.pool, company_id, target_module, category_key),
         ).await?;
         Ok(rows.iter().map(row_to_view).collect())
     }
@@ -273,32 +231,18 @@ impl CorpusWriteService {
         // RLS scope (ADR-0008): read-only, company on the parameter.
         let rows = company_scope::with_company_scope(
             Some(company_id),
-            company_scope::fetch_all_rows_scoped(
-                &self.pool,
-                sqlx::query(
-                    r#"SELECT a.id, a.title,
-                              COALESCE(SUM(CASE WHEN f.helpful THEN 1 ELSE 0 END),0) AS helpful,
-                              COALESCE(SUM(CASE WHEN NOT f.helpful THEN 1 ELSE 0 END),0) AS not_helpful
-                       FROM corpus.articles a
-                       LEFT JOIN corpus.article_feedback f
-                         ON f.article_id = a.id AND (f.metadata->>'deleted_at') IS NULL
-                       WHERE a.company_id = $1 AND (a.metadata->>'deleted_at') IS NULL
-                       GROUP BY a.id, a.title
-                       ORDER BY helpful DESC"#,
-                )
-                .bind(company_id),
-            ),
+            self.articles.feedback_tallies(&self.pool, company_id),
         ).await?;
-        Ok(rows.iter().map(|r| {
-            let helpful: i64 = r.get("helpful");
-            let not_helpful: i64 = r.get("not_helpful");
+        // The ratio is derived here, not in SQL: the repo returns the raw tallies, the service shapes them.
+        Ok(rows.into_iter().map(|r| {
+            let ArticleStatsRow { article_id, title, helpful, not_helpful } = r;
             let total = helpful + not_helpful;
             let helpful_pct = if total > 0 { Some(((helpful as f64 / total as f64) * 100.0).round() as i64) } else { None };
-            ArticleStats { article_id: r.get("id"), title: r.get("title"), helpful, not_helpful, helpful_pct }
+            ArticleStats { article_id, title, helpful, not_helpful, helpful_pct }
         }).collect())
     }
 }
 
-fn row_to_view(r: &sqlx::postgres::PgRow) -> ArticleView {
-    ArticleView { id: r.get("id"), title: r.get("title"), body: r.get("body"), category_id: r.get("category_id") }
+fn row_to_view(r: &ArticleViewRow) -> ArticleView {
+    ArticleView { id: r.id, title: r.title.clone(), body: r.body.clone(), category_id: r.category_id }
 }

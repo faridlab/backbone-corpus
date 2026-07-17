@@ -12,6 +12,14 @@
 
 user_owned:
   - "src/application/service/corpus_write_service.rs"
+  # Own the hand-written corpus SQL (the category/article/feedback inserts, the article status
+  # transitions, the idempotent link claim + re-read, the publish-gated deflection reads) that the write
+  # service orchestrates. Declared here — not renamed with a `_custom` suffix — so the generator skips
+  # them wholesale; this declaration is what makes editing them legitimate.
+  - "src/infrastructure/persistence/article_category_repository.rs"
+  - "src/infrastructure/persistence/article_repository.rs"
+  - "src/infrastructure/persistence/article_link_repository.rs"
+  - "src/infrastructure/persistence/article_feedback_repository.rs"
   - "tests/features/**"
   - "tests/corpus_golden_cases.rs"
   - "tests/integrity_probes.rs"
