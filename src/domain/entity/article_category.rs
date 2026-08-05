@@ -201,6 +201,9 @@ impl backbone_orm::EntityRepoMeta for ArticleCategory {
     fn search_fields() -> &'static [&'static str] {
         &["code", "name"]
     }
+    fn company_field() -> Option<&'static str> {
+        Some("company_id")
+    }
 }
 
 /// Builder for ArticleCategory entity

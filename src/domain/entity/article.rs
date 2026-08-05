@@ -246,6 +246,9 @@ impl backbone_orm::EntityRepoMeta for Article {
     fn search_fields() -> &'static [&'static str] {
         &["title", "body"]
     }
+    fn company_field() -> Option<&'static str> {
+        Some("company_id")
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("category", "article_categories", "categoryId")]
     }

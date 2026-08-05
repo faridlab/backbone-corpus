@@ -217,6 +217,9 @@ impl backbone_orm::EntityRepoMeta for ArticleFeedback {
     fn search_fields() -> &'static [&'static str] {
         &[]
     }
+    fn company_field() -> Option<&'static str> {
+        Some("company_id")
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("article", "articles", "articleId")]
     }

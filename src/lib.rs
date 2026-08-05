@@ -23,6 +23,7 @@ pub mod infrastructure;
 pub mod application;
 pub mod presentation;
 pub mod seeders;
+pub mod exports;
 
 // Re-exports for convenience - Domain entities
 pub use domain::entity::*;
@@ -56,10 +57,12 @@ use sqlx::PgPool;
 /// let router = corpus.all_crud_routes();
 /// ```
 pub struct CorpusModule {
-    pub article_category_service: Arc<ArticleCategoryService>,
-    pub article_service: Arc<ArticleService>,
-    pub article_link_service: Arc<ArticleLinkService>,
-    pub article_feedback_service: Arc<ArticleFeedbackService>,
+    pub(crate) article_category_service: Arc<ArticleCategoryService>,
+    pub(crate) article_service: Arc<ArticleService>,
+    pub(crate) article_link_service: Arc<ArticleLinkService>,
+    pub(crate) article_feedback_service: Arc<ArticleFeedbackService>,
+    // <<< CUSTOM FIELDS
+    // END CUSTOM
 }
 
 impl CorpusModule {
@@ -93,10 +96,33 @@ impl CorpusModule {
     /// mount exposes unguarded writes. Compose a guarded router (read + validated
     /// writes) for production, or call `all_crud_routes()` to opt into the full
     /// unguarded surface explicitly.
-    #[deprecated(note = "mounts unvalidated generic CRUD on every entity; compose a guarded router for production, or call all_crud_routes() for the intentional full/unguarded surface")]
+    #[deprecated(note = "mounts unvalidated generic CRUD; prefer readonly_routes() + validated writes, or all_crud_routes() for the full/unguarded surface")]
     pub fn routes(&self) -> Router {
         self.all_crud_routes()
     }
+
+    /// Read-only routes for every entity (GET endpoints only) — the safe base.
+    ///
+    /// Generic mutation can't reach here, so this surface cannot bypass a
+    /// validated write service's invariants. Use this as the production base and
+    /// merge validated write routes (or a write service's HTTP layer) onto it.
+    pub fn readonly_routes(&self) -> Router {
+        use presentation::http::{
+            create_article_category_read_routes,
+            create_article_read_routes,
+            create_article_link_read_routes,
+            create_article_feedback_read_routes,
+        };
+
+        Router::new()
+            .merge(create_article_category_read_routes(self.article_category_service.clone()))
+            .merge(create_article_read_routes(self.article_service.clone()))
+            .merge(create_article_link_read_routes(self.article_link_service.clone()))
+            .merge(create_article_feedback_read_routes(self.article_feedback_service.clone()))
+    }
+
+    // <<< CUSTOM METHODS
+    // END CUSTOM
 }
 
 /// Builder for CorpusModule

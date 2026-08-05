@@ -8,7 +8,7 @@
 //! ## Usage from other modules
 //!
 //! ```text
-//! use corpus::exports::{ArticleCategoryDto, CorpusQueryService};
+//! use corpus::exports::{ArticleCategoryDto};
 //! ```
 
 mod types;
@@ -39,9 +39,6 @@ pub use events::*;
 /// - `ArticleFeedbackDto` - Data transfer object for ArticleFeedback
 /// - `ArticleFeedbackSummary` - Summary view of ArticleFeedback
 /// - `ArticleFeedbackId` - Type-safe ID wrapper
-///
-/// ## Public Services
-/// - `CorpusQueryService` - Read-only queries
 ///
 /// ## Public Events
 /// - `ArticleCategoryCreatedEvent` - Published when ArticleCategory is created
