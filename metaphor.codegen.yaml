@@ -12,6 +12,11 @@
 
 user_owned:
   - "src/application/service/corpus_write_service.rs"
+  # Intentionally-empty workflows module shell. The example saga scaffold that
+  # lived here was removed (no references outside this module); the generated
+  # src/application/mod.rs still declares `pub mod workflows;`, so the empty
+  # shell is declared hand-owned so regeneration never restores scaffolding here.
+  - "src/application/workflows/mod.rs"
   # Own the hand-written corpus SQL (the category/article/feedback inserts, the article status
   # transitions, the idempotent link claim + re-read, the publish-gated deflection reads) that the write
   # service orchestrates. Declared here — not renamed with a `_custom` suffix — so the generator skips
