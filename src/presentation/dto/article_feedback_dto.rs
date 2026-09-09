@@ -5,9 +5,9 @@
 //! DTOs provide a clean separation between domain entities and API
 //! representations, with validation and OpenAPI documentation support.
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 #[cfg(feature = "openapi")]
 #[cfg(feature = "openapi")]
@@ -32,10 +32,10 @@ use crate::domain::entity::AuditMetadata;
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateArticleFeedbackDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[cfg_attr(
+        feature = "openapi",
+        schema(example = "550e8400-e29b-41d4-a716-446655440000")
+    )]
     #[serde(alias = "article_id")]
     pub article_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -58,10 +58,10 @@ pub struct CreateArticleFeedbackDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateArticleFeedbackDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[cfg_attr(
+        feature = "openapi",
+        schema(example = "550e8400-e29b-41d4-a716-446655440000")
+    )]
     #[serde(alias = "article_id")]
     pub article_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -84,10 +84,10 @@ pub struct UpdateArticleFeedbackDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct PatchArticleFeedbackDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[cfg_attr(
+        feature = "openapi",
+        schema(example = "550e8400-e29b-41d4-a716-446655440000")
+    )]
     #[serde(skip_serializing_if = "Option::is_none", alias = "article_id")]
     pub article_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -101,7 +101,7 @@ pub struct PatchArticleFeedbackDto {
 impl PatchArticleFeedbackDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.company_id.is_some() || self.article_id.is_some() || self.helpful.is_some() || self.note.is_some()
+        self.article_id.is_some() || self.helpful.is_some() || self.note.is_some()
     }
 }
 
@@ -117,11 +117,15 @@ impl PatchArticleFeedbackDto {
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ArticleFeedbackResponseDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[cfg_attr(
+        feature = "openapi",
+        schema(example = "550e8400-e29b-41d4-a716-446655440000")
+    )]
     pub id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[cfg_attr(
+        feature = "openapi",
+        schema(example = "550e8400-e29b-41d4-a716-446655440000")
+    )]
     pub article_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = true))]
     pub helpful: bool,
@@ -159,7 +163,12 @@ pub struct ArticleFeedbackListResponseDto {
 
 impl ArticleFeedbackListResponseDto {
     /// Create a new list response from items and pagination info
-    pub fn new(items: Vec<ArticleFeedbackResponseDto>, total: u64, page: u32, per_page: u32) -> Self {
+    pub fn new(
+        items: Vec<ArticleFeedbackResponseDto>,
+        total: u64,
+        page: u32,
+        per_page: u32,
+    ) -> Self {
         let total_pages = if per_page > 0 {
             ((total as f64) / (per_page as f64)).ceil() as u32
         } else {
@@ -183,9 +192,9 @@ impl ArticleFeedbackListResponseDto {
 #[serde(rename_all = "camelCase")]
 pub struct ArticleFeedbackSummaryDto {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub article_id: Uuid,
     pub helpful: bool,
+    pub note: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -197,7 +206,6 @@ impl From<ArticleFeedback> for ArticleFeedbackResponseDto {
     fn from(entity: ArticleFeedback) -> Self {
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             article_id: entity.article_id,
             helpful: entity.helpful,
             note: entity.note,
@@ -211,9 +219,9 @@ impl From<ArticleFeedback> for ArticleFeedbackSummaryDto {
         let created_at = backbone_core::PersistentEntity::created_at(&entity);
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             article_id: entity.article_id,
             helpful: entity.helpful,
+            note: entity.note,
             created_at,
         }
     }
@@ -223,7 +231,6 @@ impl From<CreateArticleFeedbackDto> for ArticleFeedback {
     fn from(dto: CreateArticleFeedbackDto) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id: dto.company_id,
             article_id: dto.article_id,
             helpful: dto.helpful,
             note: dto.note,
@@ -236,7 +243,6 @@ impl From<&ArticleFeedback> for ArticleFeedbackResponseDto {
     fn from(entity: &ArticleFeedback) -> Self {
         Self {
             id: entity.id.clone(),
-            company_id: entity.company_id.clone(),
             article_id: entity.article_id.clone(),
             helpful: entity.helpful.clone(),
             note: entity.note.clone(),
@@ -253,7 +259,6 @@ impl backbone_core::FromCreateDto<CreateArticleFeedbackDto> for ArticleFeedback 
 
 impl backbone_core::ApplyUpdateDto<UpdateArticleFeedbackDto> for ArticleFeedback {
     fn apply_update(mut self, dto: UpdateArticleFeedbackDto) -> backbone_core::ServiceResult<Self> {
-        self.company_id = dto.company_id;
         self.article_id = dto.article_id;
         self.helpful = dto.helpful;
         self.note = dto.note;
@@ -269,4 +274,3 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleFeedbackDto> for ArticleFeedback
 // Add custom DTOs specific to ArticleFeedback here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
-

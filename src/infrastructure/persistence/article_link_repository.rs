@@ -5,14 +5,16 @@
 //! below hold the hand-written ArticleLink SQL — the idempotent link claim + its conflict re-read
 //! (4-layer rule: services orchestrate, repos hold SQL).
 //!
+//! Tenancy (ADR-0029): the SQL here carries no tenant key. The claim write rides the
+//! request-dedicated connection when the composing service bound one (its fence variables govern
+//! what the RLS layer accepts) and falls back to a plain pool execute otherwise.
+//!
 //! Thin newtype over `backbone_orm::GenericCrudRepository<ArticleLink, backbone_orm::SoftDelete>`.
 //! All standard CRUD methods are available via `Deref`.
 
 use anyhow::Result;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use uuid::Uuid;
-
-use backbone_orm::company_scope;
 
 use crate::domain::entity::ArticleLink;
 
@@ -29,7 +31,9 @@ pub struct ArticleLinkRepository(
 
 impl std::ops::Deref for ArticleLinkRepository {
     type Target = backbone_orm::GenericCrudRepository<ArticleLink, backbone_orm::SoftDelete>;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl ArticleLinkRepository {
@@ -45,7 +49,6 @@ impl ArticleLinkRepository {
 /// are the polymorphic logical FK's discriminators, bound as plain text as the original write did.
 pub struct NewLinkRow<'a> {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub article_id: Uuid,
     pub target_module: &'a str,
     pub target_type: &'a str,
@@ -60,30 +63,33 @@ impl ArticleLinkRepository {
     /// linked to this target and the caller must re-read the existing link's id, so a re-link is a
     /// true no-op.
     ///
-    /// Runs outside a transaction on the pool; the caller wraps it in `with_company_scope(Some(company))`
-    /// so the INSERT passes the WITH CHECK fence (ADR-0008).
+    /// Rides the request-dedicated connection when the composing service bound a scope — under a
+    /// decorated deployment the fence's WITH CHECK governs the row; with no scope bound this is a
+    /// plain insert.
     pub async fn claim_link(
         &self,
         pool: &PgPool,
         l: &NewLinkRow<'_>,
     ) -> Result<Option<Uuid>, sqlx::Error> {
-        company_scope::fetch_optional_scalar_scoped(
+        let row = backbone_orm::org_scope::fetch_optional_row_scoped(
             pool,
-            sqlx::query_scalar(
+            sqlx::query(
                 r#"INSERT INTO corpus.article_links
-                     (id, company_id, article_id, target_module, target_type, target_id, category_key)
-                   VALUES ($1,$2,$3,$4,$5,$6,$7)
+                     (id, article_id, target_module, target_type, target_id, category_key)
+                   VALUES ($1,$2,$3,$4,$5,$6)
                    ON CONFLICT (article_id, target_module, target_id) WHERE (metadata->>'deleted_at') IS NULL
                    DO NOTHING
                    RETURNING id"#,
             )
-            .bind(l.id).bind(l.company_id).bind(l.article_id).bind(l.target_module).bind(l.target_type)
+            .bind(l.id).bind(l.article_id).bind(l.target_module).bind(l.target_type)
             .bind(l.target_id).bind(l.category_key),
         )
-        .await
+        .await?;
+        Ok(row.map(|r| r.get::<Uuid, _>("id")))
     }
 
-    /// Re-read the existing link's id after a losing claim. Caller supplies the company scope, as above.
+    /// Re-read the existing link's id after a losing claim. A plain read on the pool the caller
+    /// names; no scope is bound or invented (ADR-0029).
     pub async fn fetch_link_id(
         &self,
         pool: &PgPool,
@@ -91,15 +97,14 @@ impl ArticleLinkRepository {
         target_module: &str,
         target_id: Uuid,
     ) -> Result<Uuid, sqlx::Error> {
-        company_scope::fetch_one_scalar_scoped(
-            pool,
-            sqlx::query_scalar(
+        let id: Uuid = sqlx::query_scalar(
                 r#"SELECT id FROM corpus.article_links
                    WHERE article_id=$1 AND target_module=$2 AND target_id=$3 AND (metadata->>'deleted_at') IS NULL"#,
             )
-            .bind(article_id).bind(target_module).bind(target_id),
-        )
-        .await
+            .bind(article_id).bind(target_module).bind(target_id)
+            .fetch_one(pool)
+            .await?;
+        Ok(id)
     }
 }
 

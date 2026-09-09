@@ -8,18 +8,20 @@ pub mod error;
 pub use error::{ServiceError, ServiceResult};
 
 pub mod article_category_service;
-pub mod article_service;
-pub mod article_link_service;
 pub mod article_feedback_service;
+pub mod article_link_service;
+pub mod article_service;
 
 // <<< CUSTOM
 pub mod corpus_write_service;
 // END CUSTOM
 
 pub use article_category_service::ArticleCategoryService;
-pub use article_service::ArticleService;
-pub use article_link_service::ArticleLinkService;
 pub use article_feedback_service::ArticleFeedbackService;
+pub use article_link_service::ArticleLinkService;
+pub use article_service::ArticleService;
 // <<< CUSTOM
-pub use corpus_write_service::{CorpusWriteService, CorpusError, NewCategory, NewArticle, LinkTarget, ArticleView, ArticleStats};
+pub use corpus_write_service::{
+    ArticleStats, ArticleView, CorpusError, CorpusWriteService, LinkTarget, NewArticle, NewCategory,
+};
 // END CUSTOM

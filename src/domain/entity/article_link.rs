@@ -1,8 +1,8 @@
+use super::AuditMetadata;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use super::AuditMetadata;
 
 /// Strongly-typed ID for ArticleLink
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -10,9 +10,15 @@ use super::AuditMetadata;
 pub struct ArticleLinkId(pub Uuid);
 
 impl ArticleLinkId {
-    pub fn new(id: Uuid) -> Self { Self(id) }
-    pub fn generate() -> Self { Self(Uuid::new_v4()) }
-    pub fn into_inner(self) -> Uuid { self.0 }
+    pub fn new(id: Uuid) -> Self {
+        Self(id)
+    }
+    pub fn generate() -> Self {
+        Self(Uuid::new_v4())
+    }
+    pub fn into_inner(self) -> Uuid {
+        self.0
+    }
 }
 
 impl std::fmt::Display for ArticleLinkId {
@@ -29,26 +35,33 @@ impl std::str::FromStr for ArticleLinkId {
 }
 
 impl From<Uuid> for ArticleLinkId {
-    fn from(id: Uuid) -> Self { Self(id) }
+    fn from(id: Uuid) -> Self {
+        Self(id)
+    }
 }
 
 impl From<ArticleLinkId> for Uuid {
-    fn from(id: ArticleLinkId) -> Self { id.0 }
+    fn from(id: ArticleLinkId) -> Self {
+        id.0
+    }
 }
 
 impl AsRef<Uuid> for ArticleLinkId {
-    fn as_ref(&self) -> &Uuid { &self.0 }
+    fn as_ref(&self) -> &Uuid {
+        &self.0
+    }
 }
 
 impl std::ops::Deref for ArticleLinkId {
     type Target = Uuid;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ArticleLink {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub article_id: Uuid,
     pub target_module: String,
     pub target_type: String,
@@ -62,14 +75,18 @@ pub struct ArticleLink {
 impl ArticleLink {
     /// Create a builder for ArticleLink
     pub fn builder() -> ArticleLinkBuilder {
-        ArticleLinkBuilder::default()
+        <ArticleLinkBuilder as Default>::default()
     }
 
     /// Create a new ArticleLink with required fields
-    pub fn new(company_id: Uuid, article_id: Uuid, target_module: String, target_type: String, target_id: Uuid) -> Self {
+    pub fn new(
+        article_id: Uuid,
+        target_module: String,
+        target_type: String,
+        target_id: Uuid,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id,
             article_id,
             target_module,
             target_type,
@@ -129,7 +146,6 @@ impl ArticleLink {
         self.metadata.deleted_by.as_ref()
     }
 
-
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
     // ==========================================================
@@ -148,23 +164,30 @@ impl ArticleLink {
     pub fn apply_patch(&mut self, fields: std::collections::HashMap<String, serde_json::Value>) {
         for (key, value) in fields {
             match key.as_str() {
-                "company_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.company_id = v; }
-                }
                 "article_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.article_id = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.article_id = v;
+                    }
                 }
                 "target_module" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.target_module = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.target_module = v;
+                    }
                 }
                 "target_type" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.target_type = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.target_type = v;
+                    }
                 }
                 "target_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.target_id = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.target_id = v;
+                    }
                 }
                 "category_key" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.category_key = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.category_key = v;
+                    }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -220,16 +243,12 @@ impl backbone_orm::EntityRepoMeta for ArticleLink {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("company_id".to_string(), "uuid".to_string());
         m.insert("article_id".to_string(), "uuid".to_string());
         m.insert("target_id".to_string(), "uuid".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
         &["target_module", "target_type"]
-    }
-    fn company_field() -> Option<&'static str> {
-        Some("company_id")
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("article", "articles", "articleId")]
@@ -242,7 +261,6 @@ impl backbone_orm::EntityRepoMeta for ArticleLink {
 /// System fields (id, metadata, timestamps) are auto-initialized.
 #[derive(Debug, Clone, Default)]
 pub struct ArticleLinkBuilder {
-    company_id: Option<Uuid>,
     article_id: Option<Uuid>,
     target_module: Option<String>,
     target_type: Option<String>,
@@ -251,12 +269,6 @@ pub struct ArticleLinkBuilder {
 }
 
 impl ArticleLinkBuilder {
-    /// Set the company_id field (required)
-    pub fn company_id(mut self, value: Uuid) -> Self {
-        self.company_id = Some(value);
-        self
-    }
-
     /// Set the article_id field (required)
     pub fn article_id(mut self, value: Uuid) -> Self {
         self.article_id = Some(value);
@@ -291,15 +303,21 @@ impl ArticleLinkBuilder {
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<ArticleLink, String> {
-        let company_id = self.company_id.ok_or_else(|| "company_id is required".to_string())?;
-        let article_id = self.article_id.ok_or_else(|| "article_id is required".to_string())?;
-        let target_module = self.target_module.ok_or_else(|| "target_module is required".to_string())?;
-        let target_type = self.target_type.ok_or_else(|| "target_type is required".to_string())?;
-        let target_id = self.target_id.ok_or_else(|| "target_id is required".to_string())?;
+        let article_id = self
+            .article_id
+            .ok_or_else(|| "article_id is required".to_string())?;
+        let target_module = self
+            .target_module
+            .ok_or_else(|| "target_module is required".to_string())?;
+        let target_type = self
+            .target_type
+            .ok_or_else(|| "target_type is required".to_string())?;
+        let target_id = self
+            .target_id
+            .ok_or_else(|| "target_id is required".to_string())?;
 
         Ok(ArticleLink {
             id: Uuid::new_v4(),
-            company_id,
             article_id,
             target_module,
             target_type,

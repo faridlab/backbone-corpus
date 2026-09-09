@@ -5,10 +5,10 @@
 //! These DTOs are the ONLY types other modules should use.
 //! They are decoupled from internal domain entities.
 
+use crate::domain::entity::*;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
-use crate::domain::entity::*;
 
 // ============================================================================
 // ARTICLECATEGORY TYPES
@@ -48,7 +48,6 @@ impl From<ArticleCategoryId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArticleCategoryDto {
     pub id: ArticleCategoryId,
-    pub company_id: Uuid,
     pub code: String,
     pub name: String,
     pub metadata: serde_json::Value,
@@ -105,7 +104,6 @@ impl From<ArticleId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArticleDto {
     pub id: ArticleId,
-    pub company_id: Uuid,
     pub category_id: Option<Uuid>,
     pub title: String,
     pub body: String,
@@ -167,7 +165,6 @@ impl From<ArticleLinkId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArticleLinkDto {
     pub id: ArticleLinkId,
-    pub company_id: Uuid,
     pub article_id: Uuid,
     pub target_module: String,
     pub target_type: String,
@@ -226,7 +223,6 @@ impl From<ArticleFeedbackId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArticleFeedbackDto {
     pub id: ArticleFeedbackId,
-    pub company_id: Uuid,
     pub article_id: Uuid,
     pub helpful: bool,
     pub note: Option<String>,

@@ -7,9 +7,9 @@
 
 use backbone_core::GenericCrudService;
 
-use crate::presentation::dto::{CreateArticleLinkDto, UpdateArticleLinkDto};
 use crate::domain::entity::ArticleLink;
 use crate::infrastructure::persistence::ArticleLinkRepository;
+use crate::presentation::dto::{CreateArticleLinkDto, UpdateArticleLinkDto};
 
 /// Application service for ArticleLink entities.
 ///

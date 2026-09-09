@@ -5,8 +5,8 @@
 //! This trait defines the repository contract for the ArticleFeedback aggregate.
 //! Implementation is in the infrastructure layer.
 
-use async_trait::async_trait;
 use anyhow::Result;
+use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::domain::entity::ArticleFeedback;
@@ -44,7 +44,6 @@ pub struct ArticleFeedbackPaginatedResult {
 /// Filter parameters for list queries
 #[derive(Debug, Clone, Default)]
 pub struct ArticleFeedbackFilter {
-    pub company_id: Option<Uuid>,
     pub article_id: Option<Uuid>,
     pub helpful: Option<bool>,
     pub note: Option<String>,
@@ -53,7 +52,7 @@ pub struct ArticleFeedbackFilter {
 impl ArticleFeedbackFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.company_id.is_some() || self.article_id.is_some() || self.helpful.is_some() || self.note.is_some()
+        self.article_id.is_some() || self.helpful.is_some() || self.note.is_some()
     }
 }
 
@@ -63,7 +62,6 @@ impl ArticleFeedbackFilter {
 /// Implementations should be in the infrastructure layer.
 #[async_trait]
 pub trait ArticleFeedbackRepository: Send + Sync {
-
     // =========================================================================
     // Core CRUD Operations
     // =========================================================================
@@ -88,10 +86,17 @@ pub trait ArticleFeedbackRepository: Send + Sync {
     // =========================================================================
 
     /// List article_feedback with pagination
-    async fn list(&self, params: ArticleFeedbackPaginationParams) -> Result<ArticleFeedbackPaginatedResult>;
+    async fn list(
+        &self,
+        params: ArticleFeedbackPaginationParams,
+    ) -> Result<ArticleFeedbackPaginatedResult>;
 
     /// List article_feedback with pagination and filters
-    async fn list_with_filters(&self, params: ArticleFeedbackPaginationParams, filters: ArticleFeedbackFilter) -> Result<ArticleFeedbackPaginatedResult>;
+    async fn list_with_filters(
+        &self,
+        params: ArticleFeedbackPaginationParams,
+        filters: ArticleFeedbackFilter,
+    ) -> Result<ArticleFeedbackPaginatedResult>;
 
     /// Count all article_feedback entities
     async fn count(&self) -> Result<u64>;
@@ -113,7 +118,10 @@ pub trait ArticleFeedbackRepository: Send + Sync {
     async fn restore(&self, id: &str) -> Result<Option<ArticleFeedback>>;
 
     /// List soft-deleted article_feedback entities
-    async fn list_deleted(&self, params: ArticleFeedbackPaginationParams) -> Result<ArticleFeedbackPaginatedResult>;
+    async fn list_deleted(
+        &self,
+        params: ArticleFeedbackPaginationParams,
+    ) -> Result<ArticleFeedbackPaginatedResult>;
 
     /// Empty trash (permanently delete all soft-deleted entities)
     async fn empty_trash(&self) -> Result<u64>;

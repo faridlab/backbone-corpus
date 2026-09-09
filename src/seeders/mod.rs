@@ -10,14 +10,14 @@ use async_trait::async_trait;
 use sqlx::PgPool;
 
 mod article_category_seeder;
-mod article_seeder;
-mod article_link_seeder;
 mod article_feedback_seeder;
+mod article_link_seeder;
+mod article_seeder;
 
 pub use article_category_seeder::SeedArticleCategorySeeder;
-pub use article_seeder::SeedArticleSeeder;
-pub use article_link_seeder::SeedArticleLinkSeeder;
 pub use article_feedback_seeder::SeedArticleFeedbackSeeder;
+pub use article_link_seeder::SeedArticleLinkSeeder;
+pub use article_seeder::SeedArticleSeeder;
 
 // ============================================================================
 // SEEDER TRAIT
@@ -68,4 +68,3 @@ pub enum SeederType {
 // <<< CUSTOM SEEDERS START >>>
 // Add custom seeders here
 // <<< CUSTOM SEEDERS END >>>
-

@@ -7,9 +7,9 @@
 
 use backbone_core::GenericCrudService;
 
-use crate::presentation::dto::{CreateArticleDto, UpdateArticleDto};
 use crate::domain::entity::Article;
 use crate::infrastructure::persistence::ArticleRepository;
+use crate::presentation::dto::{CreateArticleDto, UpdateArticleDto};
 
 /// Application service for Article entities.
 ///
@@ -25,12 +25,8 @@ use crate::infrastructure::persistence::ArticleRepository;
 ///     // add domain-specific dependencies here
 /// }
 /// ```
-pub type ArticleService = GenericCrudService<
-    Article,
-    CreateArticleDto,
-    UpdateArticleDto,
-    ArticleRepository,
->;
+pub type ArticleService =
+    GenericCrudService<Article, CreateArticleDto, UpdateArticleDto, ArticleRepository>;
 
 // <<< CUSTOM
 // END CUSTOM

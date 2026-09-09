@@ -7,9 +7,9 @@
 
 use backbone_core::GenericCrudService;
 
-use crate::presentation::dto::{CreateArticleCategoryDto, UpdateArticleCategoryDto};
 use crate::domain::entity::ArticleCategory;
 use crate::infrastructure::persistence::ArticleCategoryRepository;
+use crate::presentation::dto::{CreateArticleCategoryDto, UpdateArticleCategoryDto};
 
 /// Application service for ArticleCategory entities.
 ///

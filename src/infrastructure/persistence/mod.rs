@@ -5,28 +5,11 @@
 //! Uses backbone-orm's `DatabaseOperations<T>` trait.
 
 mod article_category_repository;
-mod article_repository;
-mod article_link_repository;
 mod article_feedback_repository;
+mod article_link_repository;
+mod article_repository;
 
 // Custom persistence modules
-// <<< CUSTOM
-// END CUSTOM
-
-// Re-exports
-pub use article_category_repository::ArticleCategoryRepository;
-pub use article_repository::ArticleRepository;
-pub use article_link_repository::ArticleLinkRepository;
-pub use article_feedback_repository::ArticleFeedbackRepository;
-
-// Re-export backbone-orm types
-pub use backbone_orm::repository::{
-    DatabaseOperations, PostgresRepository,
-    PaginationParams, PaginationInfo, PaginatedResult,
-    FilterParams, FilterCondition, SortParams, SortDirection,
-};
-
-// Re-export custom persistence types
 // <<< CUSTOM
 // The hand-written corpus SQL's parameter/projection types (see the four `*_repository` modules, all
 // declared `user_owned` in metaphor.codegen.yaml).
@@ -34,4 +17,20 @@ pub use article_category_repository::NewCategoryRow;
 pub use article_feedback_repository::NewFeedbackRow;
 pub use article_link_repository::NewLinkRow;
 pub use article_repository::{ArticleStatsRow, ArticleViewRow, NewArticleRow};
+// END CUSTOM
+
+// Re-exports
+pub use article_category_repository::ArticleCategoryRepository;
+pub use article_feedback_repository::ArticleFeedbackRepository;
+pub use article_link_repository::ArticleLinkRepository;
+pub use article_repository::ArticleRepository;
+
+// Re-export backbone-orm types
+pub use backbone_orm::repository::{
+    DatabaseOperations, FilterCondition, FilterParams, PaginatedResult, PaginationInfo,
+    PaginationParams, PostgresRepository, SortDirection, SortParams,
+};
+
+// Re-export custom persistence types
+// <<< CUSTOM
 // END CUSTOM

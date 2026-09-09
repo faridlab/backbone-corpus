@@ -4,13 +4,13 @@
 
 pub mod article_category_domain_policy;
 pub mod article_domain_policy;
-pub mod article_link_domain_policy;
 pub mod article_feedback_domain_policy;
+pub mod article_link_domain_policy;
 
 pub use article_category_domain_policy::ArticleCategoryDomainPolicy;
 pub use article_domain_policy::ArticleDomainPolicy;
-pub use article_link_domain_policy::ArticleLinkDomainPolicy;
 pub use article_feedback_domain_policy::ArticleFeedbackDomainPolicy;
+pub use article_link_domain_policy::ArticleLinkDomainPolicy;
 
 // <<< CUSTOM
 // END CUSTOM

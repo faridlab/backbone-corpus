@@ -5,6 +5,12 @@
 //! below hold the hand-written Article SQL — the draft/published/archived transitions and the
 //! deflection reads (4-layer rule: services orchestrate, repos hold SQL).
 //!
+//! Tenancy (ADR-0029): the SQL here carries no tenant key. Writes run through the scoped-execute
+//! helper, which rides the request-dedicated connection when the composing service bound one (its
+//! fence variables govern what the RLS layer accepts) and falls back to a plain pool execute
+//! otherwise. Reads run plainly on the pool the caller names — under a per-unit deployment that is
+//! the unit's database, so the pool choice owns isolation.
+//!
 //! Thin newtype over `backbone_orm::GenericCrudRepository<Article, backbone_orm::SoftDelete>`.
 //! All standard CRUD methods are available via `Deref`.
 
@@ -12,8 +18,6 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
-
-use backbone_orm::company_scope;
 
 use crate::domain::entity::Article;
 
@@ -30,7 +34,9 @@ pub struct ArticleRepository(
 
 impl std::ops::Deref for ArticleRepository {
     type Target = backbone_orm::GenericCrudRepository<Article, backbone_orm::SoftDelete>;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl ArticleRepository {
@@ -46,7 +52,6 @@ impl ArticleRepository {
 /// a new article is always literal `'draft'::article_status` with `revision` 1, as the original write did.
 pub struct NewArticleRow<'a> {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub category_id: Option<Uuid>,
     pub title: &'a str,
     pub body: &'a str,
@@ -71,7 +76,10 @@ pub struct ArticleStatsRow {
 
 fn to_view_row(r: &sqlx::postgres::PgRow) -> ArticleViewRow {
     ArticleViewRow {
-        id: r.get("id"), title: r.get("title"), body: r.get("body"), category_id: r.get("category_id"),
+        id: r.get("id"),
+        title: r.get("title"),
+        body: r.get("body"),
+        category_id: r.get("category_id"),
     }
 }
 
@@ -80,20 +88,24 @@ fn to_view_row(r: &sqlx::postgres::PgRow) -> ArticleViewRow {
 impl ArticleRepository {
     /// Insert an article. Always lands as a `draft` — the publish gate is the module's invariant.
     ///
-    /// A write outside any transaction; the caller wraps it in `with_company_scope(Some(company))` so
-    /// the INSERT passes the WITH CHECK fence (ADR-0008).
+    /// Rides the request-dedicated connection when the composing service bound a scope — under a
+    /// decorated deployment the fence's WITH CHECK governs the row; with no scope bound this is a
+    /// plain insert.
     pub async fn insert_article(
         &self,
         pool: &PgPool,
         a: &NewArticleRow<'_>,
     ) -> Result<(), sqlx::Error> {
-        company_scope::execute_scoped(
+        backbone_orm::org_scope::execute_scoped(
             pool,
             sqlx::query(
-                r#"INSERT INTO corpus.articles (id, company_id, category_id, title, body, status, revision)
-                   VALUES ($1,$2,$3,$4,$5,'draft'::article_status,1)"#,
+                r#"INSERT INTO corpus.articles (id, category_id, title, body, status, revision)
+                   VALUES ($1,$2,$3,$4,'draft'::article_status,1)"#,
             )
-            .bind(a.id).bind(a.company_id).bind(a.category_id).bind(a.title).bind(a.body),
+            .bind(a.id)
+            .bind(a.category_id)
+            .bind(a.title)
+            .bind(a.body),
         )
         .await?;
         Ok(())
@@ -102,10 +114,8 @@ impl ArticleRepository {
     /// Edit an article's content, bumping the revision; returns the NEW revision, or `Ok(None)` when the
     /// article does not exist. A published edit stays published (it is a live fix).
     ///
-    /// ID-only: no company argument. `fetch_optional_scalar_scoped` means it rides the request-dedicated
-    /// connection (which carries the caller's `app.company_id`), so RLS fences the update and another
-    /// company's article is simply not found. A non-request caller MUST wrap this in
-    /// `with_company_scope(Some(company_id))` — otherwise it fails closed and returns `Ok(None)`.
+    /// Rides the request-dedicated connection when the composing service bound a scope (so a deployed
+    /// row fence governs the update); plain pool execute otherwise.
     pub async fn update_content(
         &self,
         pool: &PgPool,
@@ -113,29 +123,32 @@ impl ArticleRepository {
         title: &str,
         body: &str,
     ) -> Result<Option<i32>, sqlx::Error> {
-        company_scope::fetch_optional_scalar_scoped(
+        let row = backbone_orm::org_scope::fetch_optional_row_scoped(
             pool,
-            sqlx::query_scalar(
+            sqlx::query(
                 r#"UPDATE corpus.articles SET title=$2, body=$3, revision=revision+1
                    WHERE id=$1 AND (metadata->>'deleted_at') IS NULL
                    RETURNING revision"#,
             )
-            .bind(article_id).bind(title).bind(body),
+            .bind(article_id)
+            .bind(title)
+            .bind(body),
         )
-        .await
+        .await?;
+        Ok(row.map(|r| r.get::<i32, _>("revision")))
     }
 
     /// The draft→published transition, stamping `published_at`. CAS-gated on `draft` so it happens once;
     /// returns the rows affected so the caller can tell a real transition from a no-op.
     ///
-    /// ID-only, same RLS contract as [`Self::update_content`].
+    /// Same scoped-execute contract as [`Self::update_content`].
     pub async fn mark_published(
         &self,
         pool: &PgPool,
         article_id: Uuid,
         published_at: DateTime<Utc>,
     ) -> Result<u64, sqlx::Error> {
-        let done = company_scope::execute_scoped(
+        let done = backbone_orm::org_scope::execute_scoped(
             pool,
             sqlx::query(
                 r#"UPDATE corpus.articles
@@ -150,9 +163,9 @@ impl ArticleRepository {
 
     /// The published→archived transition (no longer served, kept for history). CAS-gated on `published`.
     ///
-    /// ID-only, same RLS contract as [`Self::update_content`].
+    /// Same scoped-execute contract as [`Self::update_content`].
     pub async fn mark_archived(&self, pool: &PgPool, article_id: Uuid) -> Result<u64, sqlx::Error> {
-        let done = company_scope::execute_scoped(
+        let done = backbone_orm::org_scope::execute_scoped(
             pool,
             sqlx::query(
                 r#"UPDATE corpus.articles SET status='archived'::article_status
@@ -167,87 +180,79 @@ impl ArticleRepository {
     /// The seam read: the PUBLISHED articles linked to a target, newest first. The `status='published'`
     /// predicate is the publish gate — a draft or archived article must never be served.
     ///
-    /// A read outside any transaction; the caller wraps it in `with_company_scope(Some(company_id))`. The
-    /// explicit `l.company_id = $1` filter stays as defense-in-depth on top of the RLS fence.
+    /// A plain read on the pool the caller names; no scope is bound or invented (ADR-0029).
     pub async fn suggest_for_target(
         &self,
         pool: &PgPool,
-        company_id: Uuid,
         target_module: &str,
         target_id: Uuid,
     ) -> Result<Vec<ArticleViewRow>, sqlx::Error> {
-        let rows = company_scope::fetch_all_rows_scoped(
-            pool,
-            sqlx::query(
-                r#"SELECT a.id, a.title, a.body, a.category_id
+        let rows = sqlx::query(
+            r#"SELECT a.id, a.title, a.body, a.category_id
                    FROM corpus.articles a
                    JOIN corpus.article_links l ON l.article_id = a.id
-                   WHERE l.company_id = $1 AND l.target_module = $2 AND l.target_id = $3
+                   WHERE l.target_module = $1 AND l.target_id = $2
                      AND a.status = 'published'::article_status
                      AND (a.metadata->>'deleted_at') IS NULL AND (l.metadata->>'deleted_at') IS NULL
                    ORDER BY a.published_at DESC NULLS LAST"#,
-            )
-            .bind(company_id).bind(target_module).bind(target_id),
         )
+        .bind(target_module)
+        .bind(target_id)
+        .fetch_all(pool)
         .await?;
         Ok(rows.iter().map(to_view_row).collect())
     }
 
     /// The browse-by-topic deflection path: PUBLISHED articles for a routing category key. Same publish
-    /// gate and same caller-supplied company scope as [`Self::suggest_for_target`].
+    /// gate and same plain-read posture as [`Self::suggest_for_target`].
     pub async fn suggest_for_category(
         &self,
         pool: &PgPool,
-        company_id: Uuid,
         target_module: &str,
         category_key: &str,
     ) -> Result<Vec<ArticleViewRow>, sqlx::Error> {
-        let rows = company_scope::fetch_all_rows_scoped(
-            pool,
-            sqlx::query(
-                r#"SELECT DISTINCT a.id, a.title, a.body, a.category_id, a.published_at
+        let rows = sqlx::query(
+            r#"SELECT DISTINCT a.id, a.title, a.body, a.category_id, a.published_at
                    FROM corpus.articles a
                    JOIN corpus.article_links l ON l.article_id = a.id
-                   WHERE l.company_id = $1 AND l.target_module = $2 AND l.category_key = $3
+                   WHERE l.target_module = $1 AND l.category_key = $2
                      AND a.status = 'published'::article_status
                      AND (a.metadata->>'deleted_at') IS NULL AND (l.metadata->>'deleted_at') IS NULL
                    ORDER BY a.published_at DESC NULLS LAST"#,
-            )
-            .bind(company_id).bind(target_module).bind(category_key),
         )
+        .bind(target_module)
+        .bind(category_key)
+        .fetch_all(pool)
         .await?;
         Ok(rows.iter().map(to_view_row).collect())
     }
 
     /// Each article's helpful / not-helpful tally — the deflection metric, summed DB-side so a consumer
-    /// never re-sums the raw votes. Same caller-supplied company scope as the other reads; the explicit
-    /// `a.company_id = $1` filter stays as defense-in-depth.
+    /// never re-sums the raw votes. Same plain-read posture as the other reads.
     pub async fn feedback_tallies(
         &self,
         pool: &PgPool,
-        company_id: Uuid,
     ) -> Result<Vec<ArticleStatsRow>, sqlx::Error> {
-        let rows = company_scope::fetch_all_rows_scoped(
-            pool,
-            sqlx::query(
-                r#"SELECT a.id, a.title,
+        let rows = sqlx::query(
+            r#"SELECT a.id, a.title,
                           COALESCE(SUM(CASE WHEN f.helpful THEN 1 ELSE 0 END),0) AS helpful,
                           COALESCE(SUM(CASE WHEN NOT f.helpful THEN 1 ELSE 0 END),0) AS not_helpful
                    FROM corpus.articles a
                    LEFT JOIN corpus.article_feedback f
                      ON f.article_id = a.id AND (f.metadata->>'deleted_at') IS NULL
-                   WHERE a.company_id = $1 AND (a.metadata->>'deleted_at') IS NULL
+                   WHERE (a.metadata->>'deleted_at') IS NULL
                    GROUP BY a.id, a.title
                    ORDER BY helpful DESC"#,
-            )
-            .bind(company_id),
         )
+        .fetch_all(pool)
         .await?;
         Ok(rows
             .iter()
             .map(|r| ArticleStatsRow {
-                article_id: r.get("id"), title: r.get("title"),
-                helpful: r.get("helpful"), not_helpful: r.get("not_helpful"),
+                article_id: r.get("id"),
+                title: r.get("title"),
+                helpful: r.get("helpful"),
+                not_helpful: r.get("not_helpful"),
             })
             .collect())
     }

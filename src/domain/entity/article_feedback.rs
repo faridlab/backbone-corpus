@@ -1,8 +1,8 @@
+use super::AuditMetadata;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use super::AuditMetadata;
 
 /// Strongly-typed ID for ArticleFeedback
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -10,9 +10,15 @@ use super::AuditMetadata;
 pub struct ArticleFeedbackId(pub Uuid);
 
 impl ArticleFeedbackId {
-    pub fn new(id: Uuid) -> Self { Self(id) }
-    pub fn generate() -> Self { Self(Uuid::new_v4()) }
-    pub fn into_inner(self) -> Uuid { self.0 }
+    pub fn new(id: Uuid) -> Self {
+        Self(id)
+    }
+    pub fn generate() -> Self {
+        Self(Uuid::new_v4())
+    }
+    pub fn into_inner(self) -> Uuid {
+        self.0
+    }
 }
 
 impl std::fmt::Display for ArticleFeedbackId {
@@ -29,26 +35,33 @@ impl std::str::FromStr for ArticleFeedbackId {
 }
 
 impl From<Uuid> for ArticleFeedbackId {
-    fn from(id: Uuid) -> Self { Self(id) }
+    fn from(id: Uuid) -> Self {
+        Self(id)
+    }
 }
 
 impl From<ArticleFeedbackId> for Uuid {
-    fn from(id: ArticleFeedbackId) -> Self { id.0 }
+    fn from(id: ArticleFeedbackId) -> Self {
+        id.0
+    }
 }
 
 impl AsRef<Uuid> for ArticleFeedbackId {
-    fn as_ref(&self) -> &Uuid { &self.0 }
+    fn as_ref(&self) -> &Uuid {
+        &self.0
+    }
 }
 
 impl std::ops::Deref for ArticleFeedbackId {
     type Target = Uuid;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ArticleFeedback {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub article_id: Uuid,
     pub helpful: bool,
     pub note: Option<String>,
@@ -60,14 +73,13 @@ pub struct ArticleFeedback {
 impl ArticleFeedback {
     /// Create a builder for ArticleFeedback
     pub fn builder() -> ArticleFeedbackBuilder {
-        ArticleFeedbackBuilder::default()
+        <ArticleFeedbackBuilder as Default>::default()
     }
 
     /// Create a new ArticleFeedback with required fields
-    pub fn new(company_id: Uuid, article_id: Uuid, helpful: bool) -> Self {
+    pub fn new(article_id: Uuid, helpful: bool) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id,
             article_id,
             helpful,
             note: None,
@@ -125,7 +137,6 @@ impl ArticleFeedback {
         self.metadata.deleted_by.as_ref()
     }
 
-
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
     // ==========================================================
@@ -144,17 +155,20 @@ impl ArticleFeedback {
     pub fn apply_patch(&mut self, fields: std::collections::HashMap<String, serde_json::Value>) {
         for (key, value) in fields {
             match key.as_str() {
-                "company_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.company_id = v; }
-                }
                 "article_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.article_id = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.article_id = v;
+                    }
                 }
                 "helpful" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.helpful = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.helpful = v;
+                    }
                 }
                 "note" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.note = v; }
+                    if let Ok(v) = serde_json::from_value(value) {
+                        self.note = v;
+                    }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -210,15 +224,11 @@ impl backbone_orm::EntityRepoMeta for ArticleFeedback {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("company_id".to_string(), "uuid".to_string());
         m.insert("article_id".to_string(), "uuid".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
-    }
-    fn company_field() -> Option<&'static str> {
-        Some("company_id")
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("article", "articles", "articleId")]
@@ -231,19 +241,12 @@ impl backbone_orm::EntityRepoMeta for ArticleFeedback {
 /// System fields (id, metadata, timestamps) are auto-initialized.
 #[derive(Debug, Clone, Default)]
 pub struct ArticleFeedbackBuilder {
-    company_id: Option<Uuid>,
     article_id: Option<Uuid>,
     helpful: Option<bool>,
     note: Option<String>,
 }
 
 impl ArticleFeedbackBuilder {
-    /// Set the company_id field (required)
-    pub fn company_id(mut self, value: Uuid) -> Self {
-        self.company_id = Some(value);
-        self
-    }
-
     /// Set the article_id field (required)
     pub fn article_id(mut self, value: Uuid) -> Self {
         self.article_id = Some(value);
@@ -266,13 +269,15 @@ impl ArticleFeedbackBuilder {
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<ArticleFeedback, String> {
-        let company_id = self.company_id.ok_or_else(|| "company_id is required".to_string())?;
-        let article_id = self.article_id.ok_or_else(|| "article_id is required".to_string())?;
-        let helpful = self.helpful.ok_or_else(|| "helpful is required".to_string())?;
+        let article_id = self
+            .article_id
+            .ok_or_else(|| "article_id is required".to_string())?;
+        let helpful = self
+            .helpful
+            .ok_or_else(|| "helpful is required".to_string())?;
 
         Ok(ArticleFeedback {
             id: Uuid::new_v4(),
-            company_id,
             article_id,
             helpful,
             note: self.note,

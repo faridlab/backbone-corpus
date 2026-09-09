@@ -1491,15 +1491,11 @@ components:
       type: object
       required:
         - id
-        - company_id
         - code
         - name
         - metadata
       properties:
         id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         code:
@@ -1527,14 +1523,10 @@ components:
     CreateArticleCategoryRequest:
       type: object
       required:
-        - company_id
         - code
         - name
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         code:
           type: string
           maxLength: 40
@@ -1547,14 +1539,10 @@ components:
     UpdateArticleCategoryRequest:
       type: object
       required:
-        - company_id
         - code
         - name
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         code:
           type: string
           maxLength: 40
@@ -1567,9 +1555,6 @@ components:
     PatchArticleCategoryRequest:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
         code:
           type: string
           maxLength: 40
@@ -1593,7 +1578,6 @@ components:
       type: object
       required:
         - id
-        - company_id
         - title
         - body
         - status
@@ -1601,9 +1585,6 @@ components:
         - metadata
       properties:
         id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         category_id:
@@ -1644,16 +1625,12 @@ components:
     CreateArticleRequest:
       type: object
       required:
-        - company_id
         - title
         - body
         - status
         - revision
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         category_id:
           nullable: true
           type: string
@@ -1679,16 +1656,12 @@ components:
     UpdateArticleRequest:
       type: object
       required:
-        - company_id
         - title
         - body
         - status
         - revision
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         category_id:
           nullable: true
           type: string
@@ -1714,9 +1687,6 @@ components:
     PatchArticleRequest:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
         category_id:
           nullable: true
           type: string
@@ -1753,7 +1723,6 @@ components:
       type: object
       required:
         - id
-        - company_id
         - article_id
         - target_module
         - target_type
@@ -1761,9 +1730,6 @@ components:
         - metadata
       properties:
         id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         article_id:
@@ -1801,16 +1767,12 @@ components:
     CreateArticleLinkRequest:
       type: object
       required:
-        - company_id
         - article_id
         - target_module
         - target_type
         - target_id
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         article_id:
           type: string
           format: uuid
@@ -1833,16 +1795,12 @@ components:
     UpdateArticleLinkRequest:
       type: object
       required:
-        - company_id
         - article_id
         - target_module
         - target_type
         - target_id
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         article_id:
           type: string
           format: uuid
@@ -1865,9 +1823,6 @@ components:
     PatchArticleLinkRequest:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
         article_id:
           type: string
           format: uuid
@@ -1901,15 +1856,11 @@ components:
       type: object
       required:
         - id
-        - company_id
         - article_id
         - helpful
         - metadata
       properties:
         id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         article_id:
@@ -1940,14 +1891,10 @@ components:
     CreateArticleFeedbackRequest:
       type: object
       required:
-        - company_id
         - article_id
         - helpful
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         article_id:
           type: string
           format: uuid
@@ -1963,14 +1910,10 @@ components:
     UpdateArticleFeedbackRequest:
       type: object
       required:
-        - company_id
         - article_id
         - helpful
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         article_id:
           type: string
           format: uuid
@@ -1986,9 +1929,6 @@ components:
     PatchArticleFeedbackRequest:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
         article_id:
           type: string
           format: uuid

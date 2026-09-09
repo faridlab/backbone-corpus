@@ -5,9 +5,9 @@
 //! Returns an `EntityValidator<Article>` pre-loaded with schema-derived
 //! field rules. Extend in the `// <<< CUSTOM` zone.
 
-use backbone_core::{EntityValidator, ValidationErrors, ValidationError};
-use backbone_core::{NonNegative, RequiredString};
 use crate::domain::entity::Article;
+use backbone_core::{EntityValidator, ValidationError, ValidationErrors};
+use backbone_core::{NonNegative, RequiredString};
 
 /// Validator type alias for Article entities.
 pub type ArticleValidator = EntityValidator<Article>;
@@ -17,7 +17,9 @@ pub fn article_validator() -> ArticleValidator {
     EntityValidator::new()
         .rule(RequiredString::new("title", |e: &Article| &e.title))
         .rule(RequiredString::new("body", |e: &Article| &e.body))
-        .rule(NonNegative::new("revision", |e: &Article| e.revision as i64))
+        .rule(NonNegative::new("revision", |e: &Article| {
+            e.revision as i64
+        }))
     // <<< CUSTOM RULES
     // END CUSTOM RULES
 }

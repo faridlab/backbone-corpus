@@ -5,9 +5,9 @@
 //! Returns an `EntityValidator<ArticleCategory>` pre-loaded with schema-derived
 //! field rules. Extend in the `// <<< CUSTOM` zone.
 
-use backbone_core::{EntityValidator, ValidationErrors, ValidationError};
-use backbone_core::{RequiredString};
 use crate::domain::entity::ArticleCategory;
+use backbone_core::RequiredString;
+use backbone_core::{EntityValidator, ValidationError, ValidationErrors};
 
 /// Validator type alias for ArticleCategory entities.
 pub type ArticleCategoryValidator = EntityValidator<ArticleCategory>;

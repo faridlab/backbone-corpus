@@ -5,9 +5,9 @@
 //! DTOs provide a clean separation between domain entities and API
 //! representations, with validation and OpenAPI documentation support.
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 #[cfg(feature = "openapi")]
 #[cfg(feature = "openapi")]
@@ -17,8 +17,8 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::domain::entity::Article;
-use crate::domain::entity::AuditMetadata;
 use crate::domain::entity::ArticleStatus;
+use crate::domain::entity::AuditMetadata;
 
 // =============================================================================
 // Create DTO
@@ -33,10 +33,11 @@ use crate::domain::entity::ArticleStatus;
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateArticleDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
-    #[serde(default, skip_serializing_if = "Option::is_none", alias = "category_id")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "category_id"
+    )]
     pub category_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 200)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
@@ -47,7 +48,11 @@ pub struct CreateArticleDto {
     pub status: ArticleStatus,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub revision: i32,
-    #[serde(default, skip_serializing_if = "Option::is_none", alias = "published_at")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "published_at"
+    )]
     pub published_at: Option<DateTime<Utc>>,
 }
 
@@ -64,10 +69,11 @@ pub struct CreateArticleDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateArticleDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
-    #[serde(default, skip_serializing_if = "Option::is_none", alias = "category_id")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "category_id"
+    )]
     pub category_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 200)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
@@ -78,7 +84,11 @@ pub struct UpdateArticleDto {
     pub status: ArticleStatus,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub revision: i32,
-    #[serde(default, skip_serializing_if = "Option::is_none", alias = "published_at")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "published_at"
+    )]
     pub published_at: Option<DateTime<Utc>>,
 }
 
@@ -95,9 +105,6 @@ pub struct UpdateArticleDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct PatchArticleDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "category_id")]
     pub category_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 200)))]
@@ -120,7 +127,12 @@ pub struct PatchArticleDto {
 impl PatchArticleDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.company_id.is_some() || self.category_id.is_some() || self.title.is_some() || self.body.is_some() || self.status.is_some() || self.revision.is_some() || self.published_at.is_some()
+        self.category_id.is_some()
+            || self.title.is_some()
+            || self.body.is_some()
+            || self.status.is_some()
+            || self.revision.is_some()
+            || self.published_at.is_some()
     }
 }
 
@@ -136,10 +148,11 @@ impl PatchArticleDto {
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ArticleResponseDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[cfg_attr(
+        feature = "openapi",
+        schema(example = "550e8400-e29b-41d4-a716-446655440000")
+    )]
     pub id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     pub category_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub title: String,
@@ -206,9 +219,9 @@ impl ArticleListResponseDto {
 #[serde(rename_all = "camelCase")]
 pub struct ArticleSummaryDto {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub category_id: Option<Uuid>,
     pub title: String,
+    pub body: String,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -220,7 +233,6 @@ impl From<Article> for ArticleResponseDto {
     fn from(entity: Article) -> Self {
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             category_id: entity.category_id,
             title: entity.title,
             body: entity.body,
@@ -237,9 +249,9 @@ impl From<Article> for ArticleSummaryDto {
         let created_at = backbone_core::PersistentEntity::created_at(&entity);
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             category_id: entity.category_id,
             title: entity.title,
+            body: entity.body,
             created_at,
         }
     }
@@ -249,7 +261,6 @@ impl From<CreateArticleDto> for Article {
     fn from(dto: CreateArticleDto) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id: dto.company_id,
             category_id: dto.category_id,
             title: dto.title,
             body: dto.body,
@@ -265,7 +276,6 @@ impl From<&Article> for ArticleResponseDto {
     fn from(entity: &Article) -> Self {
         Self {
             id: entity.id.clone(),
-            company_id: entity.company_id.clone(),
             category_id: entity.category_id.clone(),
             title: entity.title.clone(),
             body: entity.body.clone(),
@@ -285,7 +295,6 @@ impl backbone_core::FromCreateDto<CreateArticleDto> for Article {
 
 impl backbone_core::ApplyUpdateDto<UpdateArticleDto> for Article {
     fn apply_update(mut self, dto: UpdateArticleDto) -> backbone_core::ServiceResult<Self> {
-        self.company_id = dto.company_id;
         self.category_id = dto.category_id;
         self.title = dto.title;
         self.body = dto.body;
@@ -304,4 +313,3 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleDto> for Article {
 // Add custom DTOs specific to Article here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
-

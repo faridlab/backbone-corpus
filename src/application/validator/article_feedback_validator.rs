@@ -5,17 +5,18 @@
 //! Returns an `EntityValidator<ArticleFeedback>` pre-loaded with schema-derived
 //! field rules. Extend in the `// <<< CUSTOM` zone.
 
-use backbone_core::{EntityValidator, ValidationErrors, ValidationError};
-use backbone_core::{OptionalNotBlank};
 use crate::domain::entity::ArticleFeedback;
+use backbone_core::OptionalNotBlank;
+use backbone_core::{EntityValidator, ValidationError, ValidationErrors};
 
 /// Validator type alias for ArticleFeedback entities.
 pub type ArticleFeedbackValidator = EntityValidator<ArticleFeedback>;
 
 /// Build a validator for ArticleFeedback with all schema-defined field rules.
 pub fn article_feedback_validator() -> ArticleFeedbackValidator {
-    EntityValidator::new()
-        .rule(OptionalNotBlank::new("note", |e: &ArticleFeedback| e.note.as_deref()))
+    EntityValidator::new().rule(OptionalNotBlank::new("note", |e: &ArticleFeedback| {
+        e.note.as_deref()
+    }))
     // <<< CUSTOM RULES
     // END CUSTOM RULES
 }

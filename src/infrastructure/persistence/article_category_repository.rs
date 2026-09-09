@@ -4,14 +4,16 @@
 //! `user_owned` in `metaphor.codegen.yaml`, so the generator skips it wholesale. The custom methods
 //! below hold the hand-written ArticleCategory SQL (4-layer rule: services orchestrate, repos hold SQL).
 //!
+//! Tenancy (ADR-0029): the SQL here carries no tenant key. The scoped-execute helper rides the
+//! request-dedicated connection when the composing service bound one (its fence variables govern
+//! what the RLS layer accepts) and falls back to a plain pool execute otherwise.
+//!
 //! Thin newtype over `backbone_orm::GenericCrudRepository<ArticleCategory, backbone_orm::SoftDelete>`.
 //! All standard CRUD methods are available via `Deref`.
 
 use anyhow::Result;
 use sqlx::PgPool;
 use uuid::Uuid;
-
-use backbone_orm::company_scope;
 
 use crate::domain::entity::ArticleCategory;
 
@@ -28,7 +30,9 @@ pub struct ArticleCategoryRepository(
 
 impl std::ops::Deref for ArticleCategoryRepository {
     type Target = backbone_orm::GenericCrudRepository<ArticleCategory, backbone_orm::SoftDelete>;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl ArticleCategoryRepository {
@@ -43,7 +47,6 @@ impl ArticleCategoryRepository {
 /// Mirrors the raw column shape rather than the `ArticleCategory` entity.
 pub struct NewCategoryRow<'a> {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub code: &'a str,
     pub name: &'a str,
 }
@@ -53,19 +56,20 @@ pub struct NewCategoryRow<'a> {
 impl ArticleCategoryRepository {
     /// Insert a category.
     ///
-    /// A write outside any transaction: takes the pool and runs `execute_scoped` so the RLS fence
-    /// (ADR-0008) applies. The caller wraps this in `with_company_scope(Some(company))` — the company is
-    /// on the DTO, and that scope is what satisfies the INSERT's WITH CHECK fence.
+    /// Rides the request-dedicated connection when the composing service bound a scope — under a
+    /// decorated deployment the fence's WITH CHECK governs the row; with no scope bound this is a
+    /// plain insert.
     pub async fn insert_category(
         &self,
         pool: &PgPool,
         c: &NewCategoryRow<'_>,
     ) -> Result<(), sqlx::Error> {
-        company_scope::execute_scoped(
+        backbone_orm::org_scope::execute_scoped(
             pool,
-            sqlx::query(
-                "INSERT INTO corpus.article_categories (id, company_id, code, name) VALUES ($1,$2,$3,$4)")
-                .bind(c.id).bind(c.company_id).bind(c.code).bind(c.name),
+            sqlx::query("INSERT INTO corpus.article_categories (id, code, name) VALUES ($1,$2,$3)")
+                .bind(c.id)
+                .bind(c.code)
+                .bind(c.name),
         )
         .await?;
         Ok(())

@@ -18,12 +18,12 @@
 #![allow(unused_imports)]
 
 // Generated modules
-pub mod domain;
-pub mod infrastructure;
 pub mod application;
+pub mod domain;
+pub mod exports;
+pub mod infrastructure;
 pub mod presentation;
 pub mod seeders;
-pub mod exports;
 
 // Re-exports for convenience - Domain entities
 pub use domain::entity::*;
@@ -33,16 +33,16 @@ pub use infrastructure::persistence::*;
 
 // Re-exports - Application services
 pub use application::service::ArticleCategoryService;
-pub use application::service::ArticleService;
-pub use application::service::ArticleLinkService;
 pub use application::service::ArticleFeedbackService;
+pub use application::service::ArticleLinkService;
+pub use application::service::ArticleService;
 
 // Re-exports - Workflows
 pub use application::workflows::*;
 
-use std::sync::Arc;
 use axum::Router;
 use sqlx::PgPool;
+use std::sync::Arc;
 
 /// Corpus module configuration
 ///
@@ -78,17 +78,21 @@ impl CorpusModule {
     /// real deployment; use this only in trusted/admin/seeding contexts.
     pub fn all_crud_routes(&self) -> Router {
         use presentation::http::{
-            create_article_category_routes,
-            create_article_routes,
-            create_article_link_routes,
-            create_article_feedback_routes,
+            create_article_category_routes, create_article_feedback_routes,
+            create_article_link_routes, create_article_routes,
         };
 
         Router::new()
-            .merge(create_article_category_routes(self.article_category_service.clone()))
+            .merge(create_article_category_routes(
+                self.article_category_service.clone(),
+            ))
             .merge(create_article_routes(self.article_service.clone()))
-            .merge(create_article_link_routes(self.article_link_service.clone()))
-            .merge(create_article_feedback_routes(self.article_feedback_service.clone()))
+            .merge(create_article_link_routes(
+                self.article_link_service.clone(),
+            ))
+            .merge(create_article_feedback_routes(
+                self.article_feedback_service.clone(),
+            ))
     }
 
     /// Deprecated alias for [`Self::all_crud_routes`]. `routes()` reads like
@@ -96,7 +100,9 @@ impl CorpusModule {
     /// mount exposes unguarded writes. Compose a guarded router (read + validated
     /// writes) for production, or call `all_crud_routes()` to opt into the full
     /// unguarded surface explicitly.
-    #[deprecated(note = "mounts unvalidated generic CRUD; prefer readonly_routes() + validated writes, or all_crud_routes() for the full/unguarded surface")]
+    #[deprecated(
+        note = "mounts unvalidated generic CRUD; prefer readonly_routes() + validated writes, or all_crud_routes() for the full/unguarded surface"
+    )]
     pub fn routes(&self) -> Router {
         self.all_crud_routes()
     }
@@ -108,17 +114,21 @@ impl CorpusModule {
     /// merge validated write routes (or a write service's HTTP layer) onto it.
     pub fn readonly_routes(&self) -> Router {
         use presentation::http::{
-            create_article_category_read_routes,
-            create_article_read_routes,
-            create_article_link_read_routes,
-            create_article_feedback_read_routes,
+            create_article_category_read_routes, create_article_feedback_read_routes,
+            create_article_link_read_routes, create_article_read_routes,
         };
 
         Router::new()
-            .merge(create_article_category_read_routes(self.article_category_service.clone()))
+            .merge(create_article_category_read_routes(
+                self.article_category_service.clone(),
+            ))
             .merge(create_article_read_routes(self.article_service.clone()))
-            .merge(create_article_link_read_routes(self.article_link_service.clone()))
-            .merge(create_article_feedback_read_routes(self.article_feedback_service.clone()))
+            .merge(create_article_link_read_routes(
+                self.article_link_service.clone(),
+            ))
+            .merge(create_article_feedback_read_routes(
+                self.article_feedback_service.clone(),
+            ))
     }
 
     // <<< CUSTOM METHODS
@@ -133,9 +143,7 @@ pub struct CorpusModuleBuilder {
 impl CorpusModuleBuilder {
     /// Create a new builder
     pub fn new() -> Self {
-        Self {
-            db_pool: None,
-        }
+        Self { db_pool: None }
     }
 
     /// Set the database connection pool
@@ -149,12 +157,15 @@ impl CorpusModuleBuilder {
 
     /// Build the module with configured dependencies
     pub fn build(self) -> anyhow::Result<CorpusModule> {
-        let db_pool = self.db_pool
+        let db_pool = self
+            .db_pool
             .ok_or_else(|| anyhow::anyhow!("Database pool not configured"))?;
 
         // ArticleCategory service
         let article_category_repository = Arc::new(ArticleCategoryRepository::new(db_pool.clone()));
-        let article_category_service = Arc::new(ArticleCategoryService::with_repository(article_category_repository.clone()));
+        let article_category_service = Arc::new(ArticleCategoryService::with_repository(
+            article_category_repository.clone(),
+        ));
 
         // Article service
         let article_repository = Arc::new(ArticleRepository::new(db_pool.clone()));
@@ -162,11 +173,15 @@ impl CorpusModuleBuilder {
 
         // ArticleLink service
         let article_link_repository = Arc::new(ArticleLinkRepository::new(db_pool.clone()));
-        let article_link_service = Arc::new(ArticleLinkService::with_repository(article_link_repository.clone()));
+        let article_link_service = Arc::new(ArticleLinkService::with_repository(
+            article_link_repository.clone(),
+        ));
 
         // ArticleFeedback service
         let article_feedback_repository = Arc::new(ArticleFeedbackRepository::new(db_pool.clone()));
-        let article_feedback_service = Arc::new(ArticleFeedbackService::with_repository(article_feedback_repository.clone()));
+        let article_feedback_service = Arc::new(ArticleFeedbackService::with_repository(
+            article_feedback_repository.clone(),
+        ));
 
         // <<< CUSTOM
         // END CUSTOM
