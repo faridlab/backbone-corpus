@@ -65,4 +65,3 @@ async fn test_article_feedback_api() {
         panic!("{} tests failed", failed.len());
     }
 }
-

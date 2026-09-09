@@ -24,7 +24,6 @@ impl TestDataGenerator for ArticleLinkTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": Uuid::new_v4().to_string(),
-            "company_id": Uuid::new_v4().to_string(),
             "article_id": Uuid::new_v4().to_string(),
             "target_module": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "target_type": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
@@ -38,7 +37,6 @@ impl TestDataGenerator for ArticleLinkTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": id,
-            "company_id": Uuid::new_v4().to_string(),
             "article_id": Uuid::new_v4().to_string(),
             "target_module": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "target_type": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
@@ -56,7 +54,13 @@ impl TestDataGenerator for ArticleLinkTestData {
 
     async fn seed_dependencies(&self, api: &ApiTest) -> Vec<(String, String)> {
         let mut deps: Vec<(String, String)> = Vec::new();
-        if let Some(id) = super::crud_test_base::create_and_get_id(api, "/api/v1/articles", &super::article_api_test::ArticleTestData).await {
+        if let Some(id) = super::crud_test_base::create_and_get_id(
+            api,
+            "/api/v1/articles",
+            &super::article_api_test::ArticleTestData,
+        )
+        .await
+        {
             deps.push(("article_id".to_string(), id));
         }
         deps

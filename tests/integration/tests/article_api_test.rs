@@ -24,7 +24,6 @@ impl TestDataGenerator for ArticleTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": Uuid::new_v4().to_string(),
-            "company_id": Uuid::new_v4().to_string(),
             "category_id": null,
             "title": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "body": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
@@ -39,7 +38,6 @@ impl TestDataGenerator for ArticleTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": id,
-            "company_id": Uuid::new_v4().to_string(),
             "category_id": null,
             "title": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "body": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),

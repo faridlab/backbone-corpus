@@ -12,18 +12,30 @@ use uuid::Uuid;
 async fn cgc1_published_article_is_served() {
     let pool = pool().await;
     let svc = CorpusWriteService::new(pool.clone());
-    let company = Uuid::new_v4();
     let issue = Uuid::new_v4();
 
-    let art = svc.create_article(NewArticle {
-        company_id: company, category_id: None, title: "How to reset your PIN".into(), body: "Steps...".into(),
-    }).await.unwrap();
-    svc.link_article(company, art, LinkTarget {
-        target_module: "support".into(), target_type: "issue".into(), target_id: issue, category_key: Some("account".into()),
-    }).await.unwrap();
+    let art = svc
+        .create_article(NewArticle {
+            category_id: None,
+            title: "How to reset your PIN".into(),
+            body: "Steps...".into(),
+        })
+        .await
+        .unwrap();
+    svc.link_article(
+        art,
+        LinkTarget {
+            target_module: "support".into(),
+            target_type: "issue".into(),
+            target_id: issue,
+            category_key: Some("account".into()),
+        },
+    )
+    .await
+    .unwrap();
     assert!(svc.publish_article(art).await.unwrap());
 
-    let served = svc.suggest_for_target(company, "support", issue).await.unwrap();
+    let served = svc.suggest_for_target("support", issue).await.unwrap();
     assert_eq!(served.len(), 1);
     assert_eq!(served[0].id, art);
     assert_eq!(served[0].title, "How to reset your PIN");
@@ -34,14 +46,23 @@ async fn cgc1_published_article_is_served() {
 async fn cgc2_link_idempotent() {
     let pool = pool().await;
     let svc = CorpusWriteService::new(pool.clone());
-    let company = Uuid::new_v4();
     let item = Uuid::new_v4();
-    let art = svc.create_article(NewArticle {
-        company_id: company, category_id: None, title: "Care guide".into(), body: "...".into(),
-    }).await.unwrap();
-    let t = || LinkTarget { target_module: "catalog".into(), target_type: "item".into(), target_id: item, category_key: None };
-    let l1 = svc.link_article(company, art, t()).await.unwrap();
-    let l2 = svc.link_article(company, art, t()).await.unwrap();
+    let art = svc
+        .create_article(NewArticle {
+            category_id: None,
+            title: "Care guide".into(),
+            body: "...".into(),
+        })
+        .await
+        .unwrap();
+    let t = || LinkTarget {
+        target_module: "catalog".into(),
+        target_type: "item".into(),
+        target_id: item,
+        category_key: None,
+    };
+    let l1 = svc.link_article(art, t()).await.unwrap();
+    let l2 = svc.link_article(art, t()).await.unwrap();
     assert_eq!(l1, l2, "the same (article,target) link is idempotent");
 }
 
@@ -50,10 +71,14 @@ async fn cgc2_link_idempotent() {
 async fn cgc3_edit_bumps_revision() {
     let pool = pool().await;
     let svc = CorpusWriteService::new(pool.clone());
-    let company = Uuid::new_v4();
-    let art = svc.create_article(NewArticle {
-        company_id: company, category_id: None, title: "v1".into(), body: "a".into(),
-    }).await.unwrap();
+    let art = svc
+        .create_article(NewArticle {
+            category_id: None,
+            title: "v1".into(),
+            body: "a".into(),
+        })
+        .await
+        .unwrap();
     let r = svc.edit_article(art, "v2", "b").await.unwrap();
     assert_eq!(r, 2, "revision bumped 1 → 2");
 }
@@ -63,15 +88,21 @@ async fn cgc3_edit_bumps_revision() {
 async fn cgc4_feedback_tally_surfaces_deflection() {
     let pool = pool().await;
     let svc = CorpusWriteService::new(pool.clone());
-    let company = Uuid::new_v4();
-    let art = svc.create_article(NewArticle {
-        company_id: company, category_id: None, title: "Returns policy".into(), body: "...".into(),
-    }).await.unwrap();
-    svc.record_feedback(company, art, true, None).await.unwrap();
-    svc.record_feedback(company, art, true, None).await.unwrap();
-    svc.record_feedback(company, art, false, Some("unclear".into())).await.unwrap();
+    let art = svc
+        .create_article(NewArticle {
+            category_id: None,
+            title: "Returns policy".into(),
+            body: "...".into(),
+        })
+        .await
+        .unwrap();
+    svc.record_feedback(art, true, None).await.unwrap();
+    svc.record_feedback(art, true, None).await.unwrap();
+    svc.record_feedback(art, false, Some("unclear".into()))
+        .await
+        .unwrap();
 
-    let stats = svc.article_stats(company).await.unwrap();
+    let stats = svc.article_stats().await.unwrap();
     let s = stats.iter().find(|s| s.article_id == art).unwrap();
     assert_eq!(s.helpful, 2);
     assert_eq!(s.not_helpful, 1);
