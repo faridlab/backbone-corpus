@@ -12,16 +12,11 @@
 module: corpus
 version: 2
 schema: corpus
-
-# ADR-0014 company fence: every corpus table is company-private and fenced
-# strict — a denormalized company_id column with a direct equality policy on
-# `app.company_id`, fail-closed (an unset or empty app.company_id sees zero
-# rows). The policies already ship in
-# migrations/20260426220005_enable_company_rls.up.sql (article_categories,
-# articles, article_links, article_feedback). No shared_blank or shared_tree
-# entity exists here.
-company_fence: strict
-
+# Tenancy: none, by design (ADR-0029). The module is tenant-agnostic and reusable —
+# it ships no scoping column and no fence declaration. A composing backend-service
+# that wants these tables org-scoped declares them in its tenancy.yaml; the
+# decorator installs org_unit_id, the RLS policy, the kind guard, and per-unit
+# uniques at composition time.
 description: "Support-anchored knowledge base: Article + ArticleCategory + ArticleLink (polymorphic seam) + ArticleFeedback"
 
 config:

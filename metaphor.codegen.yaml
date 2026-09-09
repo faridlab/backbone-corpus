@@ -25,6 +25,10 @@ user_owned:
   - "src/infrastructure/persistence/article_repository.rs"
   - "src/infrastructure/persistence/article_link_repository.rs"
   - "src/infrastructure/persistence/article_feedback_repository.rs"
+  # Hand-authored migrations (the guarded company-artifact strip — the strip's ordering
+  # guard is hand-authored logic, not schema-derived emission).
+  - "migrations/20260909112729_strip_tenancy.up.sql"
+  - "migrations/20260909112729_strip_tenancy.down.sql"
   - "tests/features/**"
   - "tests/corpus_golden_cases.rs"
   - "tests/integrity_probes.rs"
