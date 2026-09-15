@@ -7,7 +7,7 @@ info:
     This API provides 11 standard CRUD endpoints for each model.
 
 servers:
-  - url: http://localhost:3000
+  - url: /
     description: Development server
 
 tags:
@@ -21,7 +21,7 @@ tags:
     description: ArticleFeedback management endpoints
 
 paths:
-  /api/v1/article_categories:
+  /api/v1/corpus/article_categories:
     get:
       tags:
         - ArticleCategories
@@ -67,7 +67,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/article_categories/{id}:
+  /api/v1/corpus/article_categories/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -139,7 +139,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/article_categories/bulk:
+  /api/v1/corpus/article_categories/bulk:
     post:
       tags:
         - ArticleCategories
@@ -231,7 +231,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_categories/upsert:
+  /api/v1/corpus/article_categories/upsert:
     post:
       tags:
         - ArticleCategories
@@ -261,7 +261,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleCategory'
 
-  /api/v1/article_categories/trash:
+  /api/v1/corpus/article_categories/trash:
     get:
       tags:
         - ArticleCategories
@@ -278,7 +278,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleCategoryList'
 
-  /api/v1/article_categories/{id}/restore:
+  /api/v1/corpus/article_categories/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -296,7 +296,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/article_categories/empty:
+  /api/v1/corpus/article_categories/empty:
     delete:
       tags:
         - ArticleCategories
@@ -313,7 +313,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/article_categories/delete/bulk:
+  /api/v1/corpus/article_categories/delete/bulk:
     post:
       tags:
         - ArticleCategories
@@ -333,7 +333,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_categories/restore/bulk:
+  /api/v1/corpus/article_categories/restore/bulk:
     post:
       tags:
         - ArticleCategories
@@ -351,7 +351,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_categories/restore/all:
+  /api/v1/corpus/article_categories/restore/all:
     post:
       tags:
         - ArticleCategories
@@ -367,7 +367,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/article_categories/trash/bulk:
+  /api/v1/corpus/article_categories/trash/bulk:
     delete:
       tags:
         - ArticleCategories
@@ -387,7 +387,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/articles:
+  /api/v1/corpus/articles:
     get:
       tags:
         - Articles
@@ -433,7 +433,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/articles/{id}:
+  /api/v1/corpus/articles/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -505,7 +505,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/articles/bulk:
+  /api/v1/corpus/articles/bulk:
     post:
       tags:
         - Articles
@@ -597,7 +597,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/articles/upsert:
+  /api/v1/corpus/articles/upsert:
     post:
       tags:
         - Articles
@@ -627,7 +627,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Article'
 
-  /api/v1/articles/trash:
+  /api/v1/corpus/articles/trash:
     get:
       tags:
         - Articles
@@ -644,7 +644,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleList'
 
-  /api/v1/articles/{id}/restore:
+  /api/v1/corpus/articles/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -662,7 +662,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/articles/empty:
+  /api/v1/corpus/articles/empty:
     delete:
       tags:
         - Articles
@@ -679,7 +679,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/articles/delete/bulk:
+  /api/v1/corpus/articles/delete/bulk:
     post:
       tags:
         - Articles
@@ -699,7 +699,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/articles/restore/bulk:
+  /api/v1/corpus/articles/restore/bulk:
     post:
       tags:
         - Articles
@@ -717,7 +717,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/articles/restore/all:
+  /api/v1/corpus/articles/restore/all:
     post:
       tags:
         - Articles
@@ -733,7 +733,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/articles/trash/bulk:
+  /api/v1/corpus/articles/trash/bulk:
     delete:
       tags:
         - Articles
@@ -753,7 +753,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_links:
+  /api/v1/corpus/article_links:
     get:
       tags:
         - ArticleLinks
@@ -799,7 +799,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/article_links/{id}:
+  /api/v1/corpus/article_links/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -871,7 +871,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/article_links/bulk:
+  /api/v1/corpus/article_links/bulk:
     post:
       tags:
         - ArticleLinks
@@ -963,7 +963,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_links/upsert:
+  /api/v1/corpus/article_links/upsert:
     post:
       tags:
         - ArticleLinks
@@ -993,7 +993,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleLink'
 
-  /api/v1/article_links/trash:
+  /api/v1/corpus/article_links/trash:
     get:
       tags:
         - ArticleLinks
@@ -1010,7 +1010,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleLinkList'
 
-  /api/v1/article_links/{id}/restore:
+  /api/v1/corpus/article_links/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -1028,7 +1028,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/article_links/empty:
+  /api/v1/corpus/article_links/empty:
     delete:
       tags:
         - ArticleLinks
@@ -1045,7 +1045,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/article_links/delete/bulk:
+  /api/v1/corpus/article_links/delete/bulk:
     post:
       tags:
         - ArticleLinks
@@ -1065,7 +1065,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_links/restore/bulk:
+  /api/v1/corpus/article_links/restore/bulk:
     post:
       tags:
         - ArticleLinks
@@ -1083,7 +1083,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_links/restore/all:
+  /api/v1/corpus/article_links/restore/all:
     post:
       tags:
         - ArticleLinks
@@ -1099,7 +1099,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/article_links/trash/bulk:
+  /api/v1/corpus/article_links/trash/bulk:
     delete:
       tags:
         - ArticleLinks
@@ -1119,7 +1119,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_feedbacks:
+  /api/v1/corpus/article_feedbacks:
     get:
       tags:
         - ArticleFeedbacks
@@ -1165,7 +1165,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/article_feedbacks/{id}:
+  /api/v1/corpus/article_feedbacks/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -1237,7 +1237,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/article_feedbacks/bulk:
+  /api/v1/corpus/article_feedbacks/bulk:
     post:
       tags:
         - ArticleFeedbacks
@@ -1329,7 +1329,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_feedbacks/upsert:
+  /api/v1/corpus/article_feedbacks/upsert:
     post:
       tags:
         - ArticleFeedbacks
@@ -1359,7 +1359,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleFeedback'
 
-  /api/v1/article_feedbacks/trash:
+  /api/v1/corpus/article_feedbacks/trash:
     get:
       tags:
         - ArticleFeedbacks
@@ -1376,7 +1376,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleFeedbackList'
 
-  /api/v1/article_feedbacks/{id}/restore:
+  /api/v1/corpus/article_feedbacks/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -1394,7 +1394,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/article_feedbacks/empty:
+  /api/v1/corpus/article_feedbacks/empty:
     delete:
       tags:
         - ArticleFeedbacks
@@ -1411,7 +1411,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/article_feedbacks/delete/bulk:
+  /api/v1/corpus/article_feedbacks/delete/bulk:
     post:
       tags:
         - ArticleFeedbacks
@@ -1431,7 +1431,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_feedbacks/restore/bulk:
+  /api/v1/corpus/article_feedbacks/restore/bulk:
     post:
       tags:
         - ArticleFeedbacks
@@ -1449,7 +1449,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/article_feedbacks/restore/all:
+  /api/v1/corpus/article_feedbacks/restore/all:
     post:
       tags:
         - ArticleFeedbacks
@@ -1465,7 +1465,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/article_feedbacks/trash/bulk:
+  /api/v1/corpus/article_feedbacks/trash/bulk:
     delete:
       tags:
         - ArticleFeedbacks
