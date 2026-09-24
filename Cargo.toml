@@ -1,6 +1,6 @@
 [package]
 name = "backbone-corpus"
-version = "0.2.9"
+version = "0.2.10"
 edition = "2021"
 description = "Support-anchored knowledge base: Article + ArticleCategory + ArticleLink (polymorphic) + ArticleFeedback — the deflection surface for support/portal"
 
