@@ -1,8 +1,8 @@
-use super::AuditMetadata;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
+use super::AuditMetadata;
 
 /// Strongly-typed ID for ArticleFeedback
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -10,15 +10,9 @@ use uuid::Uuid;
 pub struct ArticleFeedbackId(pub Uuid);
 
 impl ArticleFeedbackId {
-    pub fn new(id: Uuid) -> Self {
-        Self(id)
-    }
-    pub fn generate() -> Self {
-        Self(Uuid::new_v4())
-    }
-    pub fn into_inner(self) -> Uuid {
-        self.0
-    }
+    pub fn new(id: Uuid) -> Self { Self(id) }
+    pub fn generate() -> Self { Self(Uuid::new_v4()) }
+    pub fn into_inner(self) -> Uuid { self.0 }
 }
 
 impl std::fmt::Display for ArticleFeedbackId {
@@ -35,28 +29,20 @@ impl std::str::FromStr for ArticleFeedbackId {
 }
 
 impl From<Uuid> for ArticleFeedbackId {
-    fn from(id: Uuid) -> Self {
-        Self(id)
-    }
+    fn from(id: Uuid) -> Self { Self(id) }
 }
 
 impl From<ArticleFeedbackId> for Uuid {
-    fn from(id: ArticleFeedbackId) -> Self {
-        id.0
-    }
+    fn from(id: ArticleFeedbackId) -> Self { id.0 }
 }
 
 impl AsRef<Uuid> for ArticleFeedbackId {
-    fn as_ref(&self) -> &Uuid {
-        &self.0
-    }
+    fn as_ref(&self) -> &Uuid { &self.0 }
 }
 
 impl std::ops::Deref for ArticleFeedbackId {
     type Target = Uuid;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
@@ -137,6 +123,7 @@ impl ArticleFeedback {
         self.metadata.deleted_by.as_ref()
     }
 
+
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
     // ==========================================================
@@ -156,19 +143,13 @@ impl ArticleFeedback {
         for (key, value) in fields {
             match key.as_str() {
                 "article_id" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.article_id = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.article_id = v; }
                 }
                 "helpful" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.helpful = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.helpful = v; }
                 }
                 "note" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.note = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.note = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -269,12 +250,8 @@ impl ArticleFeedbackBuilder {
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<ArticleFeedback, String> {
-        let article_id = self
-            .article_id
-            .ok_or_else(|| "article_id is required".to_string())?;
-        let helpful = self
-            .helpful
-            .ok_or_else(|| "helpful is required".to_string())?;
+        let article_id = self.article_id.ok_or_else(|| "article_id is required".to_string())?;
+        let helpful = self.helpful.ok_or_else(|| "helpful is required".to_string())?;
 
         Ok(ArticleFeedback {
             id: Uuid::new_v4(),

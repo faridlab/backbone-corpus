@@ -5,8 +5,8 @@
 //! This trait defines the repository contract for the ArticleLink aggregate.
 //! Implementation is in the infrastructure layer.
 
-use anyhow::Result;
 use async_trait::async_trait;
+use anyhow::Result;
 use uuid::Uuid;
 
 use crate::domain::entity::ArticleLink;
@@ -54,11 +54,7 @@ pub struct ArticleLinkFilter {
 impl ArticleLinkFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.article_id.is_some()
-            || self.target_module.is_some()
-            || self.target_type.is_some()
-            || self.target_id.is_some()
-            || self.category_key.is_some()
+        self.article_id.is_some() || self.target_module.is_some() || self.target_type.is_some() || self.target_id.is_some() || self.category_key.is_some()
     }
 }
 
@@ -68,6 +64,7 @@ impl ArticleLinkFilter {
 /// Implementations should be in the infrastructure layer.
 #[async_trait]
 pub trait ArticleLinkRepository: Send + Sync {
+
     // =========================================================================
     // Core CRUD Operations
     // =========================================================================
@@ -92,15 +89,10 @@ pub trait ArticleLinkRepository: Send + Sync {
     // =========================================================================
 
     /// List article_link with pagination
-    async fn list(&self, params: ArticleLinkPaginationParams)
-        -> Result<ArticleLinkPaginatedResult>;
+    async fn list(&self, params: ArticleLinkPaginationParams) -> Result<ArticleLinkPaginatedResult>;
 
     /// List article_link with pagination and filters
-    async fn list_with_filters(
-        &self,
-        params: ArticleLinkPaginationParams,
-        filters: ArticleLinkFilter,
-    ) -> Result<ArticleLinkPaginatedResult>;
+    async fn list_with_filters(&self, params: ArticleLinkPaginationParams, filters: ArticleLinkFilter) -> Result<ArticleLinkPaginatedResult>;
 
     /// Count all article_link entities
     async fn count(&self) -> Result<u64>;
@@ -122,10 +114,7 @@ pub trait ArticleLinkRepository: Send + Sync {
     async fn restore(&self, id: &str) -> Result<Option<ArticleLink>>;
 
     /// List soft-deleted article_link entities
-    async fn list_deleted(
-        &self,
-        params: ArticleLinkPaginationParams,
-    ) -> Result<ArticleLinkPaginatedResult>;
+    async fn list_deleted(&self, params: ArticleLinkPaginationParams) -> Result<ArticleLinkPaginatedResult>;
 
     /// Empty trash (permanently delete all soft-deleted entities)
     async fn empty_trash(&self) -> Result<u64>;

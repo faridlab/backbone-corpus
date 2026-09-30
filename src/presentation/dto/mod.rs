@@ -7,25 +7,41 @@
 
 pub mod article_category_dto;
 pub mod article_dto;
-pub mod article_feedback_dto;
 pub mod article_link_dto;
+pub mod article_feedback_dto;
 
 // Re-exports
 pub use article_category_dto::{
-    ArticleCategoryListResponseDto, ArticleCategoryResponseDto, ArticleCategorySummaryDto,
-    CreateArticleCategoryDto, PatchArticleCategoryDto, UpdateArticleCategoryDto,
+    CreateArticleCategoryDto,
+    UpdateArticleCategoryDto,
+    PatchArticleCategoryDto,
+    ArticleCategoryResponseDto,
+    ArticleCategoryListResponseDto,
+    ArticleCategorySummaryDto,
 };
 pub use article_dto::{
-    ArticleListResponseDto, ArticleResponseDto, ArticleSummaryDto, CreateArticleDto,
-    PatchArticleDto, UpdateArticleDto,
-};
-pub use article_feedback_dto::{
-    ArticleFeedbackListResponseDto, ArticleFeedbackResponseDto, ArticleFeedbackSummaryDto,
-    CreateArticleFeedbackDto, PatchArticleFeedbackDto, UpdateArticleFeedbackDto,
+    CreateArticleDto,
+    UpdateArticleDto,
+    PatchArticleDto,
+    ArticleResponseDto,
+    ArticleListResponseDto,
+    ArticleSummaryDto,
 };
 pub use article_link_dto::{
-    ArticleLinkListResponseDto, ArticleLinkResponseDto, ArticleLinkSummaryDto,
-    CreateArticleLinkDto, PatchArticleLinkDto, UpdateArticleLinkDto,
+    CreateArticleLinkDto,
+    UpdateArticleLinkDto,
+    PatchArticleLinkDto,
+    ArticleLinkResponseDto,
+    ArticleLinkListResponseDto,
+    ArticleLinkSummaryDto,
+};
+pub use article_feedback_dto::{
+    CreateArticleFeedbackDto,
+    UpdateArticleFeedbackDto,
+    PatchArticleFeedbackDto,
+    ArticleFeedbackResponseDto,
+    ArticleFeedbackListResponseDto,
+    ArticleFeedbackSummaryDto,
 };
 
 // Common pagination types
@@ -51,12 +67,8 @@ pub struct PaginationParams {
     pub sort_order: Option<String>,
 }
 
-fn default_page() -> u32 {
-    1
-}
-fn default_per_page() -> u32 {
-    20
-}
+fn default_page() -> u32 { 1 }
+fn default_per_page() -> u32 { 20 }
 
 /// API response wrapper
 #[derive(Debug, Clone, Serialize)]
@@ -81,11 +93,7 @@ pub struct ApiError {
 
 impl<T> ApiResponse<T> {
     pub fn ok(data: T) -> Self {
-        Self {
-            success: true,
-            data: Some(data),
-            error: None,
-        }
+        Self { success: true, data: Some(data), error: None }
     }
 
     pub fn err(code: impl Into<String>, message: impl Into<String>) -> Self {

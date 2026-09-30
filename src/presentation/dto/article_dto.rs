@@ -5,9 +5,9 @@
 //! DTOs provide a clean separation between domain entities and API
 //! representations, with validation and OpenAPI documentation support.
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use chrono::{DateTime, Utc};
 
 #[cfg(feature = "openapi")]
 #[cfg(feature = "openapi")]
@@ -17,8 +17,8 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::domain::entity::Article;
-use crate::domain::entity::ArticleStatus;
 use crate::domain::entity::AuditMetadata;
+use crate::domain::entity::ArticleStatus;
 
 // =============================================================================
 // Create DTO
@@ -33,11 +33,7 @@ use crate::domain::entity::AuditMetadata;
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateArticleDto {
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        alias = "category_id"
-    )]
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "category_id")]
     pub category_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 200)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
@@ -48,11 +44,7 @@ pub struct CreateArticleDto {
     pub status: ArticleStatus,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub revision: i32,
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        alias = "published_at"
-    )]
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "published_at")]
     pub published_at: Option<DateTime<Utc>>,
 }
 
@@ -69,11 +61,7 @@ pub struct CreateArticleDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateArticleDto {
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        alias = "category_id"
-    )]
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "category_id")]
     pub category_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 200)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
@@ -84,11 +72,7 @@ pub struct UpdateArticleDto {
     pub status: ArticleStatus,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub revision: i32,
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        alias = "published_at"
-    )]
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "published_at")]
     pub published_at: Option<DateTime<Utc>>,
 }
 
@@ -127,12 +111,7 @@ pub struct PatchArticleDto {
 impl PatchArticleDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.category_id.is_some()
-            || self.title.is_some()
-            || self.body.is_some()
-            || self.status.is_some()
-            || self.revision.is_some()
-            || self.published_at.is_some()
+        self.category_id.is_some() || self.title.is_some() || self.body.is_some() || self.status.is_some() || self.revision.is_some() || self.published_at.is_some()
     }
 }
 
@@ -148,10 +127,7 @@ impl PatchArticleDto {
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ArticleResponseDto {
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub id: Uuid,
     pub category_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]

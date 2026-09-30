@@ -1,8 +1,8 @@
-use super::AuditMetadata;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
+use super::AuditMetadata;
 
 /// Strongly-typed ID for ArticleLink
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -10,15 +10,9 @@ use uuid::Uuid;
 pub struct ArticleLinkId(pub Uuid);
 
 impl ArticleLinkId {
-    pub fn new(id: Uuid) -> Self {
-        Self(id)
-    }
-    pub fn generate() -> Self {
-        Self(Uuid::new_v4())
-    }
-    pub fn into_inner(self) -> Uuid {
-        self.0
-    }
+    pub fn new(id: Uuid) -> Self { Self(id) }
+    pub fn generate() -> Self { Self(Uuid::new_v4()) }
+    pub fn into_inner(self) -> Uuid { self.0 }
 }
 
 impl std::fmt::Display for ArticleLinkId {
@@ -35,28 +29,20 @@ impl std::str::FromStr for ArticleLinkId {
 }
 
 impl From<Uuid> for ArticleLinkId {
-    fn from(id: Uuid) -> Self {
-        Self(id)
-    }
+    fn from(id: Uuid) -> Self { Self(id) }
 }
 
 impl From<ArticleLinkId> for Uuid {
-    fn from(id: ArticleLinkId) -> Self {
-        id.0
-    }
+    fn from(id: ArticleLinkId) -> Self { id.0 }
 }
 
 impl AsRef<Uuid> for ArticleLinkId {
-    fn as_ref(&self) -> &Uuid {
-        &self.0
-    }
+    fn as_ref(&self) -> &Uuid { &self.0 }
 }
 
 impl std::ops::Deref for ArticleLinkId {
     type Target = Uuid;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
@@ -79,12 +65,7 @@ impl ArticleLink {
     }
 
     /// Create a new ArticleLink with required fields
-    pub fn new(
-        article_id: Uuid,
-        target_module: String,
-        target_type: String,
-        target_id: Uuid,
-    ) -> Self {
+    pub fn new(article_id: Uuid, target_module: String, target_type: String, target_id: Uuid) -> Self {
         Self {
             id: Uuid::new_v4(),
             article_id,
@@ -146,6 +127,7 @@ impl ArticleLink {
         self.metadata.deleted_by.as_ref()
     }
 
+
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
     // ==========================================================
@@ -165,29 +147,19 @@ impl ArticleLink {
         for (key, value) in fields {
             match key.as_str() {
                 "article_id" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.article_id = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.article_id = v; }
                 }
                 "target_module" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.target_module = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.target_module = v; }
                 }
                 "target_type" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.target_type = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.target_type = v; }
                 }
                 "target_id" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.target_id = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.target_id = v; }
                 }
                 "category_key" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.category_key = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.category_key = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -303,18 +275,10 @@ impl ArticleLinkBuilder {
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<ArticleLink, String> {
-        let article_id = self
-            .article_id
-            .ok_or_else(|| "article_id is required".to_string())?;
-        let target_module = self
-            .target_module
-            .ok_or_else(|| "target_module is required".to_string())?;
-        let target_type = self
-            .target_type
-            .ok_or_else(|| "target_type is required".to_string())?;
-        let target_id = self
-            .target_id
-            .ok_or_else(|| "target_id is required".to_string())?;
+        let article_id = self.article_id.ok_or_else(|| "article_id is required".to_string())?;
+        let target_module = self.target_module.ok_or_else(|| "target_module is required".to_string())?;
+        let target_type = self.target_type.ok_or_else(|| "target_type is required".to_string())?;
+        let target_id = self.target_id.ok_or_else(|| "target_id is required".to_string())?;
 
         Ok(ArticleLink {
             id: Uuid::new_v4(),

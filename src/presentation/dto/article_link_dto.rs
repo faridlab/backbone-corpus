@@ -5,9 +5,9 @@
 //! DTOs provide a clean separation between domain entities and API
 //! representations, with validation and OpenAPI documentation support.
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use chrono::{DateTime, Utc};
 
 #[cfg(feature = "openapi")]
 #[cfg(feature = "openapi")]
@@ -32,10 +32,7 @@ use crate::domain::entity::AuditMetadata;
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateArticleLinkDto {
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "article_id")]
     pub article_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
@@ -46,18 +43,11 @@ pub struct CreateArticleLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "target_type")]
     pub target_type: String,
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "target_id")]
     pub target_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        alias = "category_key"
-    )]
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "category_key")]
     pub category_key: Option<String>,
 }
 
@@ -74,10 +64,7 @@ pub struct CreateArticleLinkDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateArticleLinkDto {
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "article_id")]
     pub article_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
@@ -88,18 +75,11 @@ pub struct UpdateArticleLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "target_type")]
     pub target_type: String,
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "target_id")]
     pub target_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        alias = "category_key"
-    )]
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "category_key")]
     pub category_key: Option<String>,
 }
 
@@ -116,10 +96,7 @@ pub struct UpdateArticleLinkDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct PatchArticleLinkDto {
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "article_id")]
     pub article_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
@@ -130,10 +107,7 @@ pub struct PatchArticleLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "target_type")]
     pub target_type: Option<String>,
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "target_id")]
     pub target_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
@@ -144,11 +118,7 @@ pub struct PatchArticleLinkDto {
 impl PatchArticleLinkDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.article_id.is_some()
-            || self.target_module.is_some()
-            || self.target_type.is_some()
-            || self.target_id.is_some()
-            || self.category_key.is_some()
+        self.article_id.is_some() || self.target_module.is_some() || self.target_type.is_some() || self.target_id.is_some() || self.category_key.is_some()
     }
 }
 
@@ -164,24 +134,15 @@ impl PatchArticleLinkDto {
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ArticleLinkResponseDto {
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub id: Uuid,
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub article_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub target_module: String,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub target_type: String,
-    #[cfg_attr(
-        feature = "openapi",
-        schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    )]
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub target_id: Uuid,
     pub category_key: Option<String>,
     pub metadata: AuditMetadata,

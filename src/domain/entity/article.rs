@@ -12,15 +12,9 @@ use super::AuditMetadata;
 pub struct ArticleId(pub Uuid);
 
 impl ArticleId {
-    pub fn new(id: Uuid) -> Self {
-        Self(id)
-    }
-    pub fn generate() -> Self {
-        Self(Uuid::new_v4())
-    }
-    pub fn into_inner(self) -> Uuid {
-        self.0
-    }
+    pub fn new(id: Uuid) -> Self { Self(id) }
+    pub fn generate() -> Self { Self(Uuid::new_v4()) }
+    pub fn into_inner(self) -> Uuid { self.0 }
 }
 
 impl std::fmt::Display for ArticleId {
@@ -37,28 +31,20 @@ impl std::str::FromStr for ArticleId {
 }
 
 impl From<Uuid> for ArticleId {
-    fn from(id: Uuid) -> Self {
-        Self(id)
-    }
+    fn from(id: Uuid) -> Self { Self(id) }
 }
 
 impl From<ArticleId> for Uuid {
-    fn from(id: ArticleId) -> Self {
-        id.0
-    }
+    fn from(id: ArticleId) -> Self { id.0 }
 }
 
 impl AsRef<Uuid> for ArticleId {
-    fn as_ref(&self) -> &Uuid {
-        &self.0
-    }
+    fn as_ref(&self) -> &Uuid { &self.0 }
 }
 
 impl std::ops::Deref for ArticleId {
     type Target = Uuid;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
@@ -150,6 +136,7 @@ impl Article {
         &self.status
     }
 
+
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
     // ==========================================================
@@ -175,34 +162,22 @@ impl Article {
         for (key, value) in fields {
             match key.as_str() {
                 "category_id" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.category_id = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.category_id = v; }
                 }
                 "title" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.title = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.title = v; }
                 }
                 "body" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.body = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.body = v; }
                 }
                 "status" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.status = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 "revision" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.revision = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.revision = v; }
                 }
                 "published_at" => {
-                    if let Ok(v) = serde_json::from_value(value) {
-                        self.published_at = v;
-                    }
+                    if let Ok(v) = serde_json::from_value(value) { self.published_at = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -260,6 +235,7 @@ impl backbone_orm::EntityRepoMeta for Article {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("category_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "article_status".to_string());
+        m.insert("published_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
