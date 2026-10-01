@@ -1,9 +1,11 @@
 [package]
 name = "backbone-corpus"
-version = "0.2.14"
+version = "0.2.15"
 edition = "2021"
 description = "Support-anchored knowledge base: Article + ArticleCategory + ArticleLink (polymorphic) + ArticleFeedback — the deflection surface for support/portal"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/faridlab/backbone-corpus"
+exclude = [".claude/", ".github/", "graphify-out/"]
 
 [lib]
 path = "src/lib.rs"
@@ -18,10 +20,10 @@ path = "src/lib.rs"
 # or `rev = "<commit-sha>"`. Cargo dedupes the git fetch — the repo is only
 # cloned once even though four crates reference it.
 # -----------------------------------------------------------------------------
-backbone-core = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27", features = ["postgres"] }
-backbone-orm = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27" }
-backbone-auth = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27" }
-backbone-messaging = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.27" }
+backbone-core = { version = "2.7.35", features = ["postgres"] }
+backbone-orm = { version = "2.7.35" }
+backbone-auth = { version = "2.7.35" }
+backbone-messaging = { version = "2.7.35" }
 
 # OpenAPI schema derive. The schema generator emits ungated `use utoipa::ToSchema;`
 # in every entity and DTO file, so the dep is unconditional even though the
@@ -79,7 +81,7 @@ validation = []
 tonic-build = "0.12"
 
 [dev-dependencies]
-backbone-support = { path = "../backbone-support" }
+backbone-support = { version = "0.6.15" }
 
 tempfile = "3.0"
 tokio-test = "0.4"
