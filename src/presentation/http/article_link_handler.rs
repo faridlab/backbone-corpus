@@ -186,3 +186,4 @@ pub fn create_protected_article_link_routes<A: AuthMiddleware + Send + Sync + 's
             }
         }))
 }
+

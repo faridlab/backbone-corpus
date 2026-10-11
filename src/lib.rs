@@ -24,8 +24,6 @@ pub mod application;
 pub mod presentation;
 pub mod seeders;
 pub mod exports;
-// <<< CUSTOM MODULES
-// END CUSTOM
 
 // Re-exports for convenience - Domain entities
 pub use domain::entity::*;
@@ -63,8 +61,6 @@ pub struct CorpusModule {
     pub(crate) article_service: Arc<ArticleService>,
     pub(crate) article_link_service: Arc<ArticleLinkService>,
     pub(crate) article_feedback_service: Arc<ArticleFeedbackService>,
-    // <<< CUSTOM FIELDS
-    // END CUSTOM
 }
 
 impl CorpusModule {
@@ -123,15 +119,11 @@ impl CorpusModule {
             .merge(create_article_feedback_read_routes(self.article_feedback_service.clone()))
     }
 
-    // <<< CUSTOM METHODS
-    // END CUSTOM
 }
 
 /// Builder for CorpusModule
 pub struct CorpusModuleBuilder {
     db_pool: Option<PgPool>,
-    // <<< CUSTOM BUILDER FIELDS
-    // END CUSTOM
 }
 
 impl CorpusModuleBuilder {
@@ -139,8 +131,6 @@ impl CorpusModuleBuilder {
     pub fn new() -> Self {
         Self {
             db_pool: None,
-            // <<< CUSTOM BUILDER DEFAULTS
-            // END CUSTOM
         }
     }
 
@@ -150,8 +140,6 @@ impl CorpusModuleBuilder {
         self
     }
 
-    // <<< CUSTOM - custom builder methods
-    // END CUSTOM
 
     /// Build the module with configured dependencies
     pub fn build(self) -> anyhow::Result<CorpusModule> {
@@ -174,16 +162,12 @@ impl CorpusModuleBuilder {
         let article_feedback_repository = Arc::new(ArticleFeedbackRepository::new(db_pool.clone()));
         let article_feedback_service = Arc::new(ArticleFeedbackService::with_repository(article_feedback_repository.clone()));
 
-        // <<< CUSTOM
-        // END CUSTOM
 
         Ok(CorpusModule {
             article_category_service,
             article_service,
             article_link_service,
             article_feedback_service,
-            // <<< CUSTOM
-            // END CUSTOM
         })
     }
 }

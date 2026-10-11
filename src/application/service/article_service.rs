@@ -32,5 +32,3 @@ pub type ArticleService = GenericCrudService<
     ArticleRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

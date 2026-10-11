@@ -32,5 +32,3 @@ pub type ArticleFeedbackService = GenericCrudService<
     ArticleFeedbackRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

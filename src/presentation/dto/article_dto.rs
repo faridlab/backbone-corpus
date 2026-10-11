@@ -285,7 +285,7 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleDto> for Article {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to Article here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

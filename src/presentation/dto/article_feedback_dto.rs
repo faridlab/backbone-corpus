@@ -250,7 +250,7 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleFeedbackDto> for ArticleFeedback
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to ArticleFeedback here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

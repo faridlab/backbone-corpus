@@ -12,15 +12,11 @@ pub mod article_service;
 pub mod article_link_service;
 pub mod article_feedback_service;
 
-// <<< CUSTOM
-// END CUSTOM
 
 pub use article_category_service::ArticleCategoryService;
 pub use article_service::ArticleService;
 pub use article_link_service::ArticleLinkService;
 pub use article_feedback_service::ArticleFeedbackService;
-// <<< CUSTOM
-// END CUSTOM
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

@@ -15,5 +15,3 @@ pub use article_validator::{ArticleValidator, article_validator};
 pub use article_link_validator::{ArticleLinkValidator, article_link_validator};
 pub use article_feedback_validator::{ArticleFeedbackValidator, article_feedback_validator};
 
-// <<< CUSTOM
-// END CUSTOM

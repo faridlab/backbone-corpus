@@ -156,8 +156,6 @@ impl ArticleFeedback {
         }
     }
 
-    // <<< CUSTOM METHODS START >>>
-    // <<< CUSTOM METHODS END >>>
 }
 
 impl super::Entity for ArticleFeedback {

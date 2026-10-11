@@ -10,8 +10,6 @@ mod article_link_repository;
 mod article_feedback_repository;
 
 // Custom persistence modules
-// <<< CUSTOM
-// END CUSTOM
 
 // Re-exports
 pub use article_category_repository::ArticleCategoryRepository;
@@ -27,8 +25,6 @@ pub use backbone_orm::repository::{
 };
 
 // Re-export custom persistence types
-// <<< CUSTOM
-// END CUSTOM
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

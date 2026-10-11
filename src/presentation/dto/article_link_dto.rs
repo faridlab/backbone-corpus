@@ -288,7 +288,7 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleLinkDto> for ArticleLink {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to ArticleLink here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -12,5 +12,3 @@ pub use article_domain_policy::ArticleDomainPolicy;
 pub use article_link_domain_policy::ArticleLinkDomainPolicy;
 pub use article_feedback_domain_policy::ArticleFeedbackDomainPolicy;
 
-// <<< CUSTOM
-// END CUSTOM

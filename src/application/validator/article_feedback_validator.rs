@@ -16,9 +16,5 @@ pub type ArticleFeedbackValidator = EntityValidator<ArticleFeedback>;
 pub fn article_feedback_validator() -> ArticleFeedbackValidator {
     EntityValidator::new()
         .rule(OptionalNotBlank::new("note", |e: &ArticleFeedback| e.note.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

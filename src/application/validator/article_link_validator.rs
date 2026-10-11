@@ -18,9 +18,5 @@ pub fn article_link_validator() -> ArticleLinkValidator {
         .rule(RequiredString::new("target_module", |e: &ArticleLink| &e.target_module))
         .rule(RequiredString::new("target_type", |e: &ArticleLink| &e.target_type))
         .rule(OptionalNotBlank::new("category_key", |e: &ArticleLink| e.category_key.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

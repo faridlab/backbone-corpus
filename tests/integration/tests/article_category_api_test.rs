@@ -99,6 +99,4 @@ mod tests {
 // CUSTOM TESTS
 // ============================================================================
 
-// <<< CUSTOM TESTS START >>>
 // Add ArticleCategory specific tests here
-// <<< CUSTOM TESTS END >>>

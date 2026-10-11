@@ -32,5 +32,3 @@ pub type ArticleLinkService = GenericCrudService<
     ArticleLinkRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

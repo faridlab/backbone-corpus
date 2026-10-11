@@ -20,5 +20,3 @@ pub use article_link_event_handlers::ArticleLinkEventHandler;
 pub use article_feedback_events::{ArticleFeedbackEvent, ArticleFeedbackEventPublisher, NoopArticleFeedbackEventPublisher};
 pub use article_feedback_event_handlers::ArticleFeedbackEventHandler;
 
-// <<< CUSTOM
-// END CUSTOM

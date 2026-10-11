@@ -18,5 +18,3 @@ use crate::domain::entity::ArticleLink;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type ArticleLinkDomainPolicy = PermitAllPolicy<ArticleLink>;
 
-// <<< CUSTOM
-// END CUSTOM

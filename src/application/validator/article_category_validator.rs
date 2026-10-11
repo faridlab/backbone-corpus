@@ -17,9 +17,5 @@ pub fn article_category_validator() -> ArticleCategoryValidator {
     EntityValidator::new()
         .rule(RequiredString::new("code", |e: &ArticleCategory| &e.code))
         .rule(RequiredString::new("name", |e: &ArticleCategory| &e.name))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

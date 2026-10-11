@@ -18,9 +18,5 @@ pub fn article_validator() -> ArticleValidator {
         .rule(RequiredString::new("title", |e: &Article| &e.title))
         .rule(RequiredString::new("body", |e: &Article| &e.body))
         .rule(NonNegative::new("revision", |e: &Article| e.revision as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -11,5 +11,3 @@ pub mod article_specification;
 pub mod article_link_specification;
 pub mod article_feedback_specification;
 
-// <<< CUSTOM
-// END CUSTOM

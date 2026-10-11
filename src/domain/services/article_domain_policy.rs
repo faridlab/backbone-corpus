@@ -18,5 +18,3 @@ use crate::domain::entity::Article;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type ArticleDomainPolicy = PermitAllPolicy<Article>;
 
-// <<< CUSTOM
-// END CUSTOM
