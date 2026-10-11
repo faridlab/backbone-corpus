@@ -11,12 +11,6 @@ mod article_feedback_repository;
 
 // Custom persistence modules
 // <<< CUSTOM
-// The hand-written corpus SQL's parameter/projection types (see the four `*_repository` modules, all
-// declared `user_owned` in metaphor.codegen.yaml).
-pub use article_category_repository::NewCategoryRow;
-pub use article_feedback_repository::NewFeedbackRow;
-pub use article_link_repository::NewLinkRow;
-pub use article_repository::{ArticleStatsRow, ArticleViewRow, NewArticleRow};
 // END CUSTOM
 
 // Re-exports
@@ -35,3 +29,6 @@ pub use backbone_orm::repository::{
 // Re-export custom persistence types
 // <<< CUSTOM
 // END CUSTOM
+
+// This directory's extension (hand-written; ADR-0031).
+include!("mod.ext.rs");

@@ -13,7 +13,6 @@ pub mod article_link_service;
 pub mod article_feedback_service;
 
 // <<< CUSTOM
-pub mod corpus_write_service;
 // END CUSTOM
 
 pub use article_category_service::ArticleCategoryService;
@@ -21,7 +20,7 @@ pub use article_service::ArticleService;
 pub use article_link_service::ArticleLinkService;
 pub use article_feedback_service::ArticleFeedbackService;
 // <<< CUSTOM
-pub use corpus_write_service::{
-    ArticleStats, ArticleView, CorpusError, CorpusWriteService, LinkTarget, NewArticle, NewCategory,
-};
 // END CUSTOM
+
+// This directory's extension (hand-written; ADR-0031).
+include!("mod.ext.rs");
