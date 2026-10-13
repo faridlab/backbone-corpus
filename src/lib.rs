@@ -37,9 +37,6 @@ pub use application::service::ArticleService;
 pub use application::service::ArticleLinkService;
 pub use application::service::ArticleFeedbackService;
 
-// Re-exports - Workflows
-pub use application::workflows::*;
-
 use std::sync::Arc;
 use axum::Router;
 use sqlx::PgPool;
