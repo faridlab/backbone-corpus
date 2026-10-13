@@ -17,6 +17,10 @@ pub use article_category_service::ArticleCategoryService;
 pub use article_service::ArticleService;
 pub use article_link_service::ArticleLinkService;
 pub use article_feedback_service::ArticleFeedbackService;
+pub use article_category_service::ArticleCategoryRowRules;
+pub use article_service::ArticleRowRules;
+pub use article_link_service::ArticleLinkRowRules;
+pub use article_feedback_service::ArticleFeedbackRowRules;
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

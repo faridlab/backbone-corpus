@@ -32,3 +32,61 @@ pub type ArticleLinkService = GenericCrudService<
     ArticleLinkRepository,
 >;
 
+/// The rules the schema declares for ArticleLink, checked against the row a create or update
+/// would store. The generated build attaches it to [`ArticleLinkService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct ArticleLinkRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<ArticleLink> for ArticleLinkRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, ArticleLink>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `article_id_required` (@required on ArticleLink.article_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["article_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "article_id")), r::not(r::is_empty(r::trim(r::field(row, "article_id")))))) {
+            refuse.push(Violation::new("article_id", "required", "article_id is required"));
+        }
+        // `target_module_required` (@required on ArticleLink.target_module)
+        if (create || (update && r::changed(old.as_ref(), row, &["target_module"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "target_module")), r::not(r::is_empty(r::trim(r::field(row, "target_module")))))) {
+            refuse.push(Violation::new("target_module", "required", "target_module is required"));
+        }
+        // `target_module_max_length` (@max(40) on ArticleLink.target_module)
+        if (create || (update && r::changed(old.as_ref(), row, &["target_module"]))) && !r::holds(&r::le(r::length(r::field(row, "target_module")), r::Val::Num(40.0_f64))) {
+            shadow.push(Violation::new("target_module", "max_length", "target_module must be at most 40 characters").with_param("max", 40_i64));
+        }
+        // `target_type_required` (@required on ArticleLink.target_type)
+        if (create || (update && r::changed(old.as_ref(), row, &["target_type"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "target_type")), r::not(r::is_empty(r::trim(r::field(row, "target_type")))))) {
+            refuse.push(Violation::new("target_type", "required", "target_type is required"));
+        }
+        // `target_type_max_length` (@max(40) on ArticleLink.target_type)
+        if (create || (update && r::changed(old.as_ref(), row, &["target_type"]))) && !r::holds(&r::le(r::length(r::field(row, "target_type")), r::Val::Num(40.0_f64))) {
+            shadow.push(Violation::new("target_type", "max_length", "target_type must be at most 40 characters").with_param("max", 40_i64));
+        }
+        // `target_id_required` (@required on ArticleLink.target_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["target_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "target_id")), r::not(r::is_empty(r::trim(r::field(row, "target_id")))))) {
+            refuse.push(Violation::new("target_id", "required", "target_id is required"));
+        }
+        // `category_key_max_length` (@max(40) on ArticleLink.category_key)
+        if (create || (update && r::changed(old.as_ref(), row, &["category_key"]))) && !r::holds(&r::le(r::length(r::field(row, "category_key")), r::Val::Num(40.0_f64))) {
+            shadow.push(Violation::new("category_key", "max_length", "category_key must be at most 40 characters").with_param("max", 40_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

@@ -148,19 +148,19 @@ impl CorpusModuleBuilder {
 
         // ArticleCategory service
         let article_category_repository = Arc::new(ArticleCategoryRepository::new(db_pool.clone()));
-        let article_category_service = Arc::new(ArticleCategoryService::with_repository(article_category_repository.clone()));
+        let article_category_service = Arc::new(ArticleCategoryService::with_repository(article_category_repository.clone()).with_guard(Arc::new(crate::application::service::ArticleCategoryRowRules)));
 
         // Article service
         let article_repository = Arc::new(ArticleRepository::new(db_pool.clone()));
-        let article_service = Arc::new(ArticleService::with_repository(article_repository.clone()));
+        let article_service = Arc::new(ArticleService::with_repository(article_repository.clone()).with_guard(Arc::new(crate::application::service::ArticleRowRules)));
 
         // ArticleLink service
         let article_link_repository = Arc::new(ArticleLinkRepository::new(db_pool.clone()));
-        let article_link_service = Arc::new(ArticleLinkService::with_repository(article_link_repository.clone()));
+        let article_link_service = Arc::new(ArticleLinkService::with_repository(article_link_repository.clone()).with_guard(Arc::new(crate::application::service::ArticleLinkRowRules)));
 
         // ArticleFeedback service
         let article_feedback_repository = Arc::new(ArticleFeedbackRepository::new(db_pool.clone()));
-        let article_feedback_service = Arc::new(ArticleFeedbackService::with_repository(article_feedback_repository.clone()));
+        let article_feedback_service = Arc::new(ArticleFeedbackService::with_repository(article_feedback_repository.clone()).with_guard(Arc::new(crate::application::service::ArticleFeedbackRowRules)));
 
 
         Ok(CorpusModule {

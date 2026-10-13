@@ -32,3 +32,53 @@ pub type ArticleService = GenericCrudService<
     ArticleRepository,
 >;
 
+/// The rules the schema declares for Article, checked against the row a create or update
+/// would store. The generated build attaches it to [`ArticleService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct ArticleRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Article> for ArticleRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Article>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `title_required` (@required on Article.title)
+        if (create || (update && r::changed(old.as_ref(), row, &["title"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "title")), r::not(r::is_empty(r::trim(r::field(row, "title")))))) {
+            refuse.push(Violation::new("title", "required", "title is required"));
+        }
+        // `title_max_length` (@max(200) on Article.title)
+        if (create || (update && r::changed(old.as_ref(), row, &["title"]))) && !r::holds(&r::le(r::length(r::field(row, "title")), r::Val::Num(200.0_f64))) {
+            shadow.push(Violation::new("title", "max_length", "title must be at most 200 characters").with_param("max", 200_i64));
+        }
+        // `body_required` (@required on Article.body)
+        if (create || (update && r::changed(old.as_ref(), row, &["body"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "body")), r::not(r::is_empty(r::trim(r::field(row, "body")))))) {
+            refuse.push(Violation::new("body", "required", "body is required"));
+        }
+        // `body_max_length` (@max(20000) on Article.body)
+        if (create || (update && r::changed(old.as_ref(), row, &["body"]))) && !r::holds(&r::le(r::length(r::field(row, "body")), r::Val::Num(20000.0_f64))) {
+            shadow.push(Violation::new("body", "max_length", "body must be at most 20000 characters").with_param("max", 20000_i64));
+        }
+        // `revision_non_negative` (@non_negative on Article.revision)
+        if (create || (update && r::changed(old.as_ref(), row, &["revision"]))) && !r::holds(&r::ge(r::field(row, "revision"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("revision", "non_negative", "revision must not be negative"));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+
