@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<ArticleFeedback> for ArticleFeedback
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `article_id_required` (@required on ArticleFeedback.article_id)
         if (create || (update && r::changed(old.as_ref(), row, &["article_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "article_id")), r::not(r::is_empty(r::trim(r::field(row, "article_id")))))) {
@@ -64,7 +64,7 @@ impl backbone_core::write_guard::WriteGuard<ArticleFeedback> for ArticleFeedback
         }
         // `note_max_length` (@max(1000) on ArticleFeedback.note)
         if (create || (update && r::changed(old.as_ref(), row, &["note"]))) && !r::holds(&r::le(r::length(r::field(row, "note")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("note", "max_length", "note must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("note", "max_length", "note must be at most 1000 characters").with_param("max", 1000_i64));
         }
         GuardOutcome { refuse, shadow }
     }

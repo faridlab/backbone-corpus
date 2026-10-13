@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<ArticleLink> for ArticleLinkRowRules
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `article_id_required` (@required on ArticleLink.article_id)
         if (create || (update && r::changed(old.as_ref(), row, &["article_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "article_id")), r::not(r::is_empty(r::trim(r::field(row, "article_id")))))) {
@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<ArticleLink> for ArticleLinkRowRules
         }
         // `target_module_max_length` (@max(40) on ArticleLink.target_module)
         if (create || (update && r::changed(old.as_ref(), row, &["target_module"]))) && !r::holds(&r::le(r::length(r::field(row, "target_module")), r::Val::Num(40.0_f64))) {
-            shadow.push(Violation::new("target_module", "max_length", "target_module must be at most 40 characters").with_param("max", 40_i64));
+            refuse.push(Violation::new("target_module", "max_length", "target_module must be at most 40 characters").with_param("max", 40_i64));
         }
         // `target_type_required` (@required on ArticleLink.target_type)
         if (create || (update && r::changed(old.as_ref(), row, &["target_type"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "target_type")), r::not(r::is_empty(r::trim(r::field(row, "target_type")))))) {
@@ -76,7 +76,7 @@ impl backbone_core::write_guard::WriteGuard<ArticleLink> for ArticleLinkRowRules
         }
         // `target_type_max_length` (@max(40) on ArticleLink.target_type)
         if (create || (update && r::changed(old.as_ref(), row, &["target_type"]))) && !r::holds(&r::le(r::length(r::field(row, "target_type")), r::Val::Num(40.0_f64))) {
-            shadow.push(Violation::new("target_type", "max_length", "target_type must be at most 40 characters").with_param("max", 40_i64));
+            refuse.push(Violation::new("target_type", "max_length", "target_type must be at most 40 characters").with_param("max", 40_i64));
         }
         // `target_id_required` (@required on ArticleLink.target_id)
         if (create || (update && r::changed(old.as_ref(), row, &["target_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "target_id")), r::not(r::is_empty(r::trim(r::field(row, "target_id")))))) {
@@ -84,7 +84,7 @@ impl backbone_core::write_guard::WriteGuard<ArticleLink> for ArticleLinkRowRules
         }
         // `category_key_max_length` (@max(40) on ArticleLink.category_key)
         if (create || (update && r::changed(old.as_ref(), row, &["category_key"]))) && !r::holds(&r::le(r::length(r::field(row, "category_key")), r::Val::Num(40.0_f64))) {
-            shadow.push(Violation::new("category_key", "max_length", "category_key must be at most 40 characters").with_param("max", 40_i64));
+            refuse.push(Violation::new("category_key", "max_length", "category_key must be at most 40 characters").with_param("max", 40_i64));
         }
         GuardOutcome { refuse, shadow }
     }
