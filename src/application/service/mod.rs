@@ -22,5 +22,37 @@ pub use article_service::ArticleRowRules;
 pub use article_link_service::ArticleLinkRowRules;
 pub use article_feedback_service::ArticleFeedbackRowRules;
 
+/// A `ArticleCategoryService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_article_category_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::ArticleCategoryRepository>,
+) -> ArticleCategoryService {
+    ArticleCategoryService::with_repository(repository).with_guard(std::sync::Arc::new(ArticleCategoryRowRules))
+}
+
+/// A `ArticleService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_article_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::ArticleRepository>,
+) -> ArticleService {
+    ArticleService::with_repository(repository).with_guard(std::sync::Arc::new(ArticleRowRules))
+}
+
+/// A `ArticleLinkService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_article_link_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::ArticleLinkRepository>,
+) -> ArticleLinkService {
+    ArticleLinkService::with_repository(repository).with_guard(std::sync::Arc::new(ArticleLinkRowRules))
+}
+
+/// A `ArticleFeedbackService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_article_feedback_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::ArticleFeedbackRepository>,
+) -> ArticleFeedbackService {
+    ArticleFeedbackService::with_repository(repository).with_guard(std::sync::Arc::new(ArticleFeedbackRowRules))
+}
+
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");
