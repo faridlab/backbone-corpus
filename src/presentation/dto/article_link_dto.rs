@@ -96,8 +96,8 @@ pub struct PatchArticleLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "target_id")]
     pub target_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "category_key")]
-    pub category_key: Option<String>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "category_key")]
+    pub category_key: Option<Option<String>>,
 }
 
 impl PatchArticleLinkDto {
@@ -268,12 +268,4 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleLinkDto> for ArticleLink {
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to ArticleLink here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

@@ -35,11 +35,21 @@ pub struct CreateArticleDto {
     pub title: String,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub body: String,
+    #[serde(default = "default_create_article_status")]
     pub status: ArticleStatus,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
+    #[serde(default = "default_create_article_revision")]
     pub revision: i32,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "published_at")]
     pub published_at: Option<DateTime<Utc>>,
+}
+
+fn default_create_article_status() -> ArticleStatus {
+    ArticleStatus::Draft
+}
+
+fn default_create_article_revision() -> i32 {
+    1
 }
 
 // =============================================================================
@@ -79,8 +89,8 @@ pub struct UpdateArticleDto {
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PatchArticleDto {
-    #[serde(skip_serializing_if = "Option::is_none", alias = "category_id")]
-    pub category_id: Option<Uuid>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "category_id")]
+    pub category_id: Option<Option<Uuid>>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
@@ -92,8 +102,8 @@ pub struct PatchArticleDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub revision: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "published_at")]
-    pub published_at: Option<DateTime<Utc>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "published_at")]
+    pub published_at: Option<Option<DateTime<Utc>>>,
 }
 
 impl PatchArticleDto {
@@ -268,12 +278,4 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleDto> for Article {
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to Article here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

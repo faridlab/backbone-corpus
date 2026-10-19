@@ -222,11 +222,3 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleCategoryDto> for ArticleCategory
     }
 }
 
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to ArticleCategory here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
-

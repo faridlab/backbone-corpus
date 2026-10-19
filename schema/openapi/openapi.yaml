@@ -1525,7 +1525,6 @@ components:
       required:
         - code
         - name
-        - metadata
       properties:
         code:
           type: string
@@ -1533,15 +1532,12 @@ components:
         name:
           type: string
           maxLength: 120
-        metadata:
-          type: object
 
     UpdateArticleCategoryRequest:
       type: object
       required:
         - code
         - name
-        - metadata
       properties:
         code:
           type: string
@@ -1549,8 +1545,6 @@ components:
         name:
           type: string
           maxLength: 120
-        metadata:
-          type: object
 
     PatchArticleCategoryRequest:
       type: object
@@ -1561,8 +1555,6 @@ components:
         name:
           type: string
           maxLength: 120
-        metadata:
-          type: object
 
     ArticleCategoryList:
       type: object
@@ -1627,9 +1619,6 @@ components:
       required:
         - title
         - body
-        - status
-        - revision
-        - metadata
       properties:
         category_id:
           nullable: true
@@ -1650,8 +1639,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     UpdateArticleRequest:
       type: object
@@ -1660,7 +1647,6 @@ components:
         - body
         - status
         - revision
-        - metadata
       properties:
         category_id:
           nullable: true
@@ -1681,8 +1667,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     PatchArticleRequest:
       type: object
@@ -1706,8 +1690,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     ArticleList:
       type: object
@@ -1771,7 +1753,6 @@ components:
         - target_module
         - target_type
         - target_id
-        - metadata
       properties:
         article_id:
           type: string
@@ -1789,8 +1770,6 @@ components:
           nullable: true
           type: string
           maxLength: 40
-        metadata:
-          type: object
 
     UpdateArticleLinkRequest:
       type: object
@@ -1799,7 +1778,6 @@ components:
         - target_module
         - target_type
         - target_id
-        - metadata
       properties:
         article_id:
           type: string
@@ -1817,8 +1795,6 @@ components:
           nullable: true
           type: string
           maxLength: 40
-        metadata:
-          type: object
 
     PatchArticleLinkRequest:
       type: object
@@ -1839,8 +1815,6 @@ components:
           nullable: true
           type: string
           maxLength: 40
-        metadata:
-          type: object
 
     ArticleLinkList:
       type: object
@@ -1893,7 +1867,6 @@ components:
       required:
         - article_id
         - helpful
-        - metadata
       properties:
         article_id:
           type: string
@@ -1904,15 +1877,12 @@ components:
           nullable: true
           type: string
           maxLength: 1000
-        metadata:
-          type: object
 
     UpdateArticleFeedbackRequest:
       type: object
       required:
         - article_id
         - helpful
-        - metadata
       properties:
         article_id:
           type: string
@@ -1923,8 +1893,6 @@ components:
           nullable: true
           type: string
           maxLength: 1000
-        metadata:
-          type: object
 
     PatchArticleFeedbackRequest:
       type: object
@@ -1938,8 +1906,6 @@ components:
           nullable: true
           type: string
           maxLength: 1000
-        metadata:
-          type: object
 
     ArticleFeedbackList:
       type: object

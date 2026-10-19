@@ -76,8 +76,8 @@ pub struct PatchArticleFeedbackDto {
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub helpful: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub note: Option<String>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option")]
+    pub note: Option<Option<String>>,
 }
 
 impl PatchArticleFeedbackDto {
@@ -236,12 +236,4 @@ impl backbone_core::ApplyUpdateDto<UpdateArticleFeedbackDto> for ArticleFeedback
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to ArticleFeedback here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

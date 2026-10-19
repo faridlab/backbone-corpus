@@ -12,7 +12,7 @@ pub mod article_feedback_handler;
 
 
 // Re-exports
-pub use article_category_handler::{create_article_category_routes, create_article_category_read_routes, create_article_category_write_routes};
-pub use article_handler::{create_article_routes, create_article_read_routes, create_article_write_routes};
-pub use article_link_handler::{create_article_link_routes, create_article_link_read_routes, create_article_link_write_routes};
-pub use article_feedback_handler::{create_article_feedback_routes, create_article_feedback_read_routes, create_article_feedback_write_routes};
+pub use article_category_handler::{create_article_category_routes, create_article_category_read_routes, create_article_category_write_routes, article_category_permissions};
+pub use article_handler::{create_article_routes, create_article_read_routes, create_article_write_routes, article_permissions};
+pub use article_link_handler::{create_article_link_routes, create_article_link_read_routes, create_article_link_write_routes, article_link_permissions};
+pub use article_feedback_handler::{create_article_feedback_routes, create_article_feedback_read_routes, create_article_feedback_write_routes, article_feedback_permissions};
